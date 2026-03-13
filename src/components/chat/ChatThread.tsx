@@ -71,7 +71,7 @@ export function ChatThread({ calendarId, eventId, isOwner }: ChatThreadProps) {
   const grouped = groupMessagesByDate(messages);
 
   return (
-    <div className="flex h-[500px] flex-col rounded-lg border bg-card">
+    <div className="flex h-[500px] flex-col rounded-sm border bg-card">
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <MessageSquare className="h-4 w-4 text-muted-foreground" />
         <h3 className="text-sm font-semibold">Chat</h3>

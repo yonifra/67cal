@@ -63,7 +63,7 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
     <div
       {...getRootProps()}
       className={cn(
-        'cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors',
+        'cursor-pointer rounded-sm border-2 border-dashed p-6 text-center transition-colors',
         isDragActive
           ? 'border-primary bg-primary/5'
           : 'border-muted-foreground/25 hover:border-primary/50',
@@ -77,7 +77,7 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
           <p className="text-sm text-muted-foreground">
             Uploading... {Math.round(progress)}%
           </p>
-          <div className="h-2 w-48 rounded-full bg-muted overflow-hidden">
+          <div className="h-2 w-48 rounded-sm bg-muted overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${progress}%` }}

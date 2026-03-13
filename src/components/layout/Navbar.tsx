@@ -36,7 +36,7 @@ export function Navbar() {
     : user?.email?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-border bg-background">
       <div className="container flex h-14 items-center justify-between px-4">
         <Link href="/en/dashboard" className="flex items-center gap-2">
           <Calendar className="h-6 w-6 text-primary" />
@@ -47,7 +47,7 @@ export function Navbar() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                <Button variant="ghost" className="relative h-9 w-9 rounded-sm">
                   <Avatar className="h-9 w-9">
                     <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                       {initials}

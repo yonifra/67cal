@@ -122,7 +122,7 @@ function EventDetailContent() {
                 <p className="text-muted-foreground">{event.description}</p>
               )}
               {isCancelled && event.cancelReason && (
-                <div className="mt-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <div className="mt-2 rounded-sm bg-destructive/15 px-3 py-2 text-sm text-destructive">
                   <strong>Reason:</strong> {event.cancelReason}
                 </div>
               )}

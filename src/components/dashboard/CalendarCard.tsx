@@ -16,10 +16,10 @@ interface CalendarCardProps {
 }
 
 const themeColors: Record<string, string> = {
-  kids: 'bg-pink-100 text-pink-700 border-pink-200',
-  teen: 'bg-purple-100 text-purple-700 border-purple-200',
-  adult: 'bg-blue-100 text-blue-700 border-blue-200',
-  minimal: 'bg-gray-100 text-gray-700 border-gray-200',
+  kids: 'bg-pink-500 text-white border-pink-500',
+  teen: 'bg-purple-500 text-white border-purple-500',
+  adult: 'bg-blue-500 text-white border-blue-500',
+  minimal: 'bg-gray-500 text-white border-gray-500',
 };
 
 export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps) {
@@ -28,7 +28,7 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
     : '';
 
   return (
-    <Card className="group hover:shadow-md transition-shadow">
+    <Card className="group hover:border-primary transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">

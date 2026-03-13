@@ -35,10 +35,10 @@ export function MessageBubble({
     >
       <div
         className={cn(
-          'group relative max-w-[75%] rounded-2xl px-4 py-2 shadow-sm',
+          'group relative max-w-[75%] rounded-sm px-4 py-2',
           isTeacherMessage
-            ? 'bg-primary text-primary-foreground rounded-br-md'
-            : 'bg-muted text-foreground rounded-bl-md'
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-muted text-foreground'
         )}
       >
         <div className="flex items-center gap-2 mb-0.5">
@@ -53,7 +53,7 @@ export function MessageBubble({
           {isTeacherMessage && (
             <span
               className={cn(
-                'text-[10px] px-1.5 py-0.5 rounded-full',
+                'text-[10px] px-1.5 py-0.5 rounded-sm',
                 isTeacherMessage
                   ? 'bg-primary-foreground/20 text-primary-foreground/80'
                   : 'bg-primary/10 text-primary'

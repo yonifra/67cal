@@ -14,13 +14,18 @@ function getAdminApp(): App | null {
     return null;
   }
 
-  return initializeApp({
-    credential: cert({
-      projectId,
-      clientEmail,
-      privateKey: privateKey.replace(/\\n/g, '\n'),
-    }),
-  });
+  try {
+    return initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKey.replace(/\\n/g, '\n'),
+      }),
+    });
+  } catch (error) {
+    console.warn('Firebase Admin failed to initialize (invalid credentials):', error);
+    return null;
+  }
 }
 
 const adminApp = getAdminApp();

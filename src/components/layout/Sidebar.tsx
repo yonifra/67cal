@@ -48,7 +48,7 @@ export function Sidebar({ isOpen, onToggle }: SidebarProps) {
             <Link
               key={cal.id}
               href={`/en/calendar/${cal.id}`}
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors"
+              className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm hover:bg-accent transition-colors"
             >
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span className="truncate">{cal.title}</span>

@@ -40,7 +40,7 @@ export function WeekView({ calendarId, events, locale = 'en' }: WeekViewProps) {
   };
 
   return (
-    <div className="rounded-lg border bg-card p-4">
+    <div className="rounded-sm border bg-card p-4">
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin]}

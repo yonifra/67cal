@@ -31,7 +31,7 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col">
       {/* Hero */}
       <section className="flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-sm bg-primary text-primary-foreground mb-6">
           <Calendar className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-4">
@@ -58,7 +58,7 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="border-t bg-muted/30 px-4 py-20">
+      <section className="border-t bg-muted px-4 py-20">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-2xl font-bold text-center mb-12">
             Everything you need for remote learning
@@ -106,8 +106,8 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="flex flex-col items-center text-center p-6 rounded-lg">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+    <div className="flex flex-col items-center text-center p-6 rounded-sm">
+      <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-primary-foreground mb-4">
         {icon}
       </div>
       <h3 className="font-semibold mb-2">{title}</h3>

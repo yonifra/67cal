@@ -94,7 +94,7 @@ function SettingsContent() {
 
       <Separator className="my-8" />
 
-      <div className="rounded-lg border border-destructive/50 p-6">
+      <div className="rounded-sm border border-destructive/50 p-6">
         <h3 className="text-lg font-semibold text-destructive mb-2">Danger Zone</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Deleting this calendar will permanently remove all events, messages, and files.

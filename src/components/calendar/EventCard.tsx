@@ -32,7 +32,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
   return (
     <div
       className={cn(
-        'cursor-pointer rounded-md p-2 text-xs transition-colors',
+        'cursor-pointer rounded-sm p-2 text-xs transition-colors',
         isCancelled
           ? 'bg-muted/50 text-muted-foreground'
           : 'bg-primary/10 text-primary hover:bg-primary/20'
