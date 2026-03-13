@@ -5,17 +5,11 @@ import * as bcrypt from 'bcryptjs';
 admin.initializeApp();
 const db = admin.firestore();
 
-interface VerifyPasswordData {
-  calendarId: string;
-  password: string;
-}
-
 export const verifyCalendarPassword = functions.https.onCall(
-  async (request: functions.https.CallableRequest<VerifyPasswordData>) => {
-    const { calendarId, password } = request.data;
-    const auth = request.auth;
+  async (data: { calendarId: string; password: string }, context) => {
+    const { calendarId, password } = data;
 
-    if (!auth) {
+    if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
     }
 
@@ -34,7 +28,7 @@ export const verifyCalendarPassword = functions.https.onCall(
     if (!calendarData.passwordHash) {
       // No password required, just add member
       await db.collection('calendars').doc(calendarId).update({
-        members: admin.firestore.FieldValue.arrayUnion(auth.uid),
+        members: admin.firestore.FieldValue.arrayUnion(context.auth.uid),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
       return { success: true };
@@ -47,7 +41,7 @@ export const verifyCalendarPassword = functions.https.onCall(
     }
 
     await db.collection('calendars').doc(calendarId).update({
-      members: admin.firestore.FieldValue.arrayUnion(auth.uid),
+      members: admin.firestore.FieldValue.arrayUnion(context.auth.uid),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -57,11 +51,10 @@ export const verifyCalendarPassword = functions.https.onCall(
 
 // Hash password when calendar is created or password is updated
 export const hashCalendarPassword = functions.https.onCall(
-  async (request: functions.https.CallableRequest<{ password: string }>) => {
-    const { password } = request.data;
-    const auth = request.auth;
+  async (data: { password: string }, context) => {
+    const { password } = data;
 
-    if (!auth) {
+    if (!context.auth) {
       throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
     }
 
