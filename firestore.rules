@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() { return request.auth != null; }
+    function isOwner(calId) {
+      return get(/databases/$(database)/documents/calendars/$(calId)).data.ownerId == request.auth.uid;
+    }
+    function isMember(calId) {
+      return request.auth.uid in get(/databases/$(database)/documents/calendars/$(calId)).data.members;
+    }
+
+    match /calendars/{calId} {
+      allow read: if isAuth() && (isOwner(calId) || isMember(calId));
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && isOwner(calId);
+
+      match /events/{eventId} {
+        allow read: if isAuth() && (isOwner(calId) || isMember(calId));
+        allow write: if isAuth() && isOwner(calId);
+
+        match /messages/{msgId} {
+          allow read: if isAuth() && (isOwner(calId) || isMember(calId));
+          allow create: if isAuth() && (isOwner(calId) || isMember(calId));
+          allow update, delete: if isAuth() && request.auth.uid == resource.data.authorId;
+        }
+
+        match /files/{fileId} {
+          allow read: if isAuth() && (isOwner(calId) || isMember(calId));
+          allow write: if isAuth() && isOwner(calId);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,232 @@
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { CalendarEvent } from '@/types';
+import { getEvent, cancelEvent } from '@/lib/firestore/events';
+import { useCalendar } from '@/hooks/useCalendar';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthGuard } from '@/components/auth/AuthGuard';
+import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { MeetingLinkButton } from '@/components/calendar/MeetingLinkButton';
+import { ExportButton } from '@/components/calendar/ExportButton';
+import { CancelEventModal } from '@/components/calendar/CancelEventModal';
+import { ChatThread } from '@/components/chat/ChatThread';
+import { FileList } from '@/components/files/FileList';
+import { FileUploader } from '@/components/files/FileUploader';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Edit,
+  Ban,
+  Loader2,
+  FileText,
+} from 'lucide-react';
+import Link from 'next/link';
+import { format } from 'date-fns';
+import toast from 'react-hot-toast';
+
+function EventDetailContent() {
+  const params = useParams();
+  const router = useRouter();
+  const calendarId = params.calendarId as string;
+  const eventId = params.eventId as string;
+  const { calendar, loading: calLoading, isOwner } = useCalendar(calendarId);
+  const [event, setEvent] = useState<CalendarEvent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [fileRefreshKey, setFileRefreshKey] = useState(0);
+
+  useEffect(() => {
+    async function fetch() {
+      try {
+        const ev = await getEvent(calendarId, eventId);
+        setEvent(ev);
+      } catch {
+        toast.error('Failed to load event');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetch();
+  }, [calendarId, eventId]);
+
+  const handleCancel = async (reason: string) => {
+    try {
+      await cancelEvent(calendarId, eventId, reason);
+      setEvent((prev) =>
+        prev ? { ...prev, status: 'cancelled', cancelReason: reason } : null
+      );
+      toast.success('Event cancelled');
+    } catch {
+      toast.error('Failed to cancel event');
+    }
+  };
+
+  if (loading || calLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!event || !calendar) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <h2 className="text-xl font-semibold mb-2">Event not found</h2>
+        <Button asChild>
+          <Link href={`/en/calendar/${calendarId}`}>Back to Calendar</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const isCancelled = event.status === 'cancelled';
+  const startDate = event.startTime?.toDate ? event.startTime.toDate() : new Date();
+  const endDate = event.endTime?.toDate ? event.endTime.toDate() : new Date();
+
+  return (
+    <ThemeProvider theme={calendar.theme}>
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <Button variant="ghost" asChild className="mb-6">
+          <Link href={`/en/calendar/${calendarId}`}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Calendar
+          </Link>
+        </Button>
+
+        {/* Event Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <h1
+                  className={`text-3xl font-bold ${isCancelled ? 'line-through text-muted-foreground' : ''}`}
+                >
+                  {event.title}
+                </h1>
+                {isCancelled && (
+                  <Badge variant="destructive" className="text-sm">
+                    <Ban className="mr-1 h-3 w-3" />
+                    Cancelled
+                  </Badge>
+                )}
+              </div>
+              {event.description && (
+                <p className="text-muted-foreground">{event.description}</p>
+              )}
+              {isCancelled && event.cancelReason && (
+                <div className="mt-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <strong>Reason:</strong> {event.cancelReason}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <ExportButton event={event} />
+              {isOwner && !isCancelled && (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/en/calendar/${calendarId}/event/${eventId}/edit`}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => setCancelModalOpen(true)}
+                  >
+                    <Ban className="mr-2 h-4 w-4" />
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Date/Time and Meeting Link */}
+          <div className="flex flex-wrap items-center gap-4 mt-4">
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{format(startDate, 'EEEE, MMMM d, yyyy')}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>
+                {format(startDate, 'h:mm a')} — {format(endDate, 'h:mm a')}
+              </span>
+            </div>
+          </div>
+
+          {event.meetingLink && !isCancelled && (
+            <div className="mt-4">
+              <MeetingLinkButton
+                meetingLink={event.meetingLink}
+                provider={event.meetingProvider}
+              />
+            </div>
+          )}
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Content Grid: Files + Chat */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Files Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <FileText className="h-5 w-5" />
+                Files
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {isOwner && (
+                <FileUploader
+                  calendarId={calendarId}
+                  eventId={eventId}
+                  onUploadComplete={() => setFileRefreshKey((k) => k + 1)}
+                />
+              )}
+              <FileList
+                calendarId={calendarId}
+                eventId={eventId}
+                isOwner={isOwner}
+                refreshKey={fileRefreshKey}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Chat Section */}
+          <ChatThread
+            calendarId={calendarId}
+            eventId={eventId}
+            isOwner={isOwner}
+          />
+        </div>
+
+        <CancelEventModal
+          open={cancelModalOpen}
+          onClose={() => setCancelModalOpen(false)}
+          onConfirm={handleCancel}
+          eventTitle={event.title}
+        />
+      </div>
+    </ThemeProvider>
+  );
+}
+
+export default function EventDetailPage() {
+  return (
+    <AuthGuard>
+      <EventDetailContent />
+    </AuthGuard>
+  );
+}

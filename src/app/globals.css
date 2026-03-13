@@ -116,6 +116,79 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Theme: Kids - Bright, playful, rounded corners, large text */
+[data-theme="kids"] {
+  --primary: oklch(0.65 0.25 330);      /* playful pink */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.78 0.18 180);    /* teal */
+  --secondary-foreground: oklch(0.15 0 0);
+  --accent: oklch(0.82 0.2 85);         /* warm yellow */
+  --accent-foreground: oklch(0.15 0 0);
+  --background: oklch(0.98 0.01 85);    /* warm white */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0 0);
+  --muted: oklch(0.95 0.02 330);
+  --muted-foreground: oklch(0.45 0 0);
+  --border: oklch(0.9 0.03 330);
+  --radius: 1rem;
+  font-size: 18px;
+}
+
+/* Theme: Teen - Bold, modern, dark accents */
+[data-theme="teen"] {
+  --primary: oklch(0.55 0.25 270);      /* vivid purple */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.6 0.2 200);      /* electric blue */
+  --secondary-foreground: oklch(1 0 0);
+  --accent: oklch(0.7 0.22 150);        /* neon green */
+  --accent-foreground: oklch(0.1 0 0);
+  --background: oklch(0.14 0.005 270);  /* near-black purple */
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.2 0.01 270);
+  --card-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.25 0.01 270);
+  --muted-foreground: oklch(0.7 0 0);
+  --border: oklch(0.3 0.02 270);
+  --input: oklch(0.25 0.01 270);
+  --radius: 0.5rem;
+}
+
+/* Theme: Adult - Clean, neutral, business-like */
+[data-theme="adult"] {
+  --primary: oklch(0.45 0.1 240);       /* professional blue */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.005 240);
+  --secondary-foreground: oklch(0.2 0 0);
+  --accent: oklch(0.9 0.01 240);
+  --accent-foreground: oklch(0.2 0 0);
+  --background: oklch(0.99 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.5 0 0);
+  --border: oklch(0.9 0 0);
+  --radius: 0.375rem;
+  font-size: 15px;
+}
+
+/* Theme: Minimal - White/grey, max simplicity */
+[data-theme="minimal"] {
+  --primary: oklch(0.25 0 0);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.2 0 0);
+  --accent: oklch(0.94 0 0);
+  --accent-foreground: oklch(0.2 0 0);
+  --background: oklch(1 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  --border: oklch(0.92 0 0);
+  --radius: 0.25rem;
+  font-size: 15px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
