@@ -68,7 +68,7 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
         </div>
       </CardContent>
       {isOwner && (
-        <CardFooter className="flex gap-2 pt-0">
+        <CardFooter className="flex items-center gap-2">
           <InviteModal inviteCode={calendar.inviteCode} calendarTitle={calendar.title} />
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/${locale}/calendar/${calendar.id}/settings`}>
