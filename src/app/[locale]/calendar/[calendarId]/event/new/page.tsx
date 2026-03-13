@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { EventFormData } from '@/types';
 import { createEvent } from '@/lib/firestore/events';
 import { useCalendar } from '@/hooks/useCalendar';
@@ -17,11 +17,16 @@ import { useLocale } from 'next-intl';
 function NewEventContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const calendarId = params.calendarId as string;
   const { calendar, loading, isOwner } = useCalendar(calendarId);
   const t = useTranslations('event');
   const tCommon = useTranslations('common');
   const locale = useLocale();
+
+  // Read pre-filled start/end times from query params (set by WeekView drag-select)
+  const prefillStart = searchParams.get('start') || '';
+  const prefillEnd = searchParams.get('end') || '';
 
   if (loading) {
     return (
@@ -50,6 +55,11 @@ function NewEventContent() {
     }
   };
 
+  const initialData: Partial<EventFormData> | undefined =
+    prefillStart || prefillEnd
+      ? { startTime: prefillStart, endTime: prefillEnd }
+      : undefined;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Button variant="ghost" asChild className="mb-6">
@@ -58,7 +68,7 @@ function NewEventContent() {
           {tCommon('backToCalendar')}
         </Link>
       </Button>
-      <EventForm onSubmit={handleSubmit} />
+      <EventForm onSubmit={handleSubmit} initialData={initialData} />
     </div>
   );
 }

@@ -289,3 +289,17 @@
 .fc .fc-button:focus {
   box-shadow: 0 0 0 2px var(--ring);
 }
+
+/* Selection styling for drag-to-create */
+.fc .fc-timegrid-col.fc-day {
+  cursor: crosshair;
+}
+
+.fc .fc-highlight {
+  background-color: var(--primary);
+  opacity: 0.15;
+}
+
+.fc .fc-event {
+  cursor: pointer;
+}

@@ -4,6 +4,8 @@ import { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import heLocale from '@fullcalendar/core/locales/he';
 import { CalendarEvent, FirstDay, WeekendDays } from '@/types';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
@@ -14,6 +16,7 @@ interface WeekViewProps {
   locale?: string;
   firstDay?: FirstDay;
   weekendDays?: WeekendDays;
+  isOwner?: boolean;
 }
 
 export function WeekView({
@@ -22,6 +25,7 @@ export function WeekView({
   locale = 'en',
   firstDay = 0,
   weekendDays = 'sat-sun',
+  isOwner = false,
 }: WeekViewProps) {
   const router = useRouter();
   const siteLocale = useLocale();
@@ -54,12 +58,33 @@ export function WeekView({
     router.push(`/${siteLocale}/calendar/${calendarId}/event/${eventId}`);
   };
 
+  // When the owner clicks or drags on the grid, navigate to the new event
+  // page with the selected start/end times pre-filled as query params.
+  const handleSelect = (info: any) => {
+    if (!isOwner) return;
+
+    // Format dates as datetime-local values (YYYY-MM-DDTHH:MM)
+    const formatForInput = (date: Date) => {
+      const pad = (n: number) => String(n).padStart(2, '0');
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
+    const start = formatForInput(info.start);
+    const end = formatForInput(info.end);
+
+    router.push(
+      `/${siteLocale}/calendar/${calendarId}/event/new?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`
+    );
+  };
+
   return (
     <div className="rounded-xl border bg-card p-4">
       <FullCalendar
         ref={calendarRef}
-        plugins={[timeGridPlugin, dayGridPlugin]}
+        plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
         initialView="timeGridWeek"
+        locales={[heLocale]}
+        locale={locale}
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',
@@ -67,8 +92,10 @@ export function WeekView({
         }}
         events={fcEvents}
         eventClick={handleEventClick}
+        selectable={isOwner}
+        selectMirror={isOwner}
+        select={handleSelect}
         direction={locale === 'he' ? 'rtl' : 'ltr'}
-        locale={locale}
         firstDay={firstDay}
         hiddenDays={hiddenDays}
         height="auto"

@@ -98,6 +98,7 @@ function CalendarContent() {
             locale={calendar.language}
             firstDay={calendar.firstDay ?? 0}
             weekendDays={calendar.weekendDays || 'sat-sun'}
+            isOwner={isOwner}
           />
         )}
       </div>
