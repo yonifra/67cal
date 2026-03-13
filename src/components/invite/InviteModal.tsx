@@ -25,7 +25,7 @@ export function InviteModal({ inviteCode, calendarTitle }: InviteModalProps) {
   const t = useTranslations('invite');
   const tc = useTranslations('calendar');
   const locale = useLocale();
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const inviteUrl = `${baseUrl}/${locale}/invite/${inviteCode}`;
 
   return (

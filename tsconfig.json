@@ -38,6 +38,11 @@
   ],
   "exclude": [
     "node_modules",
-    "functions"
+    "functions",
+    "src/test",
+    "**/__tests__",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "vitest.config.mts"
   ]
 }
