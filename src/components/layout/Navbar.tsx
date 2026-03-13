@@ -36,20 +36,20 @@ export function Navbar() {
     : user?.email?.[0]?.toUpperCase() ?? '?';
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-border bg-background">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
-        <Link href="/en/dashboard" className="flex items-center gap-2">
-          <Calendar className="h-6 w-6 text-primary" />
-          <span className="text-lg font-bold">67Cal</span>
+        <Link href="/en/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <Calendar className="h-5 w-5 text-primary" />
+          <span className="font-heading text-lg font-bold tracking-tight">67Cal</span>
         </Link>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-9 w-9 rounded-sm">
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
                   <Avatar className="h-9 w-9">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                    <AvatarFallback className="rounded-full bg-primary text-primary-foreground text-sm font-medium">
                       {initials}
                     </AvatarFallback>
                   </Avatar>

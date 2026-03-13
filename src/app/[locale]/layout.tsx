@@ -1,12 +1,18 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import { Inter, Heebo, JetBrains_Mono } from 'next/font/google';
+import { Inter, Heebo, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import '../globals.css';
 
 const inter = Inter({
   variable: '--font-inter',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: '--font-heading',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -37,7 +43,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
       <body
-        className={`${inter.variable} ${heebo.variable} ${jetbrainsMono.variable} ${isRTL ? 'font-hebrew' : 'font-sans'} antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${heebo.variable} ${jetbrainsMono.variable} ${isRTL ? 'font-hebrew' : 'font-sans'} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <Navbar />

@@ -52,7 +52,7 @@ function CalendarContent() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">{calendar.title}</h1>
+              <h1 className="font-heading text-2xl font-bold tracking-tight">{calendar.title}</h1>
               {calendar.description && (
                 <p className="text-sm text-muted-foreground">{calendar.description}</p>
               )}

@@ -8,6 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-heading), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-hebrew: var(--font-heebo), "Heebo", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -72,7 +73,7 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.125rem;
+  --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.55 0.2 250);
@@ -151,7 +152,7 @@
   --muted-foreground: oklch(0.7 0 0);
   --border: oklch(0.35 0.03 270);
   --input: oklch(0.25 0.01 270);
-  --radius: 0.125rem;
+  --radius: 0.5rem;
 }
 
 /* Theme: Adult - Clean, neutral, business-like */
@@ -168,7 +169,7 @@
   --muted: oklch(0.96 0 0);
   --muted-foreground: oklch(0.5 0 0);
   --border: oklch(0.9 0 0);
-  --radius: 0.125rem;
+  --radius: 0.5rem;
   font-size: 15px;
 }
 
@@ -204,6 +205,17 @@
     @apply font-sans;
   }
   html[dir="rtl"] {
+    @apply font-hebrew;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] h5,
+  html[dir="rtl"] h6 {
     @apply font-hebrew;
   }
 }

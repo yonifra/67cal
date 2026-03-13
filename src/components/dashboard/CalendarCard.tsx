@@ -28,7 +28,7 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
     : '';
 
   return (
-    <Card className="group hover:border-primary transition-colors">
+    <Card className="group hover:border-primary/40 hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">

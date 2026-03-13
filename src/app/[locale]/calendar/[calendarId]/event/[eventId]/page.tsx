@@ -107,7 +107,7 @@ function EventDetailContent() {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <h1
-                  className={`text-3xl font-bold ${isCancelled ? 'line-through text-muted-foreground' : ''}`}
+                  className={`font-heading text-3xl font-bold tracking-tight ${isCancelled ? 'line-through text-muted-foreground' : ''}`}
                 >
                   {event.title}
                 </h1>
