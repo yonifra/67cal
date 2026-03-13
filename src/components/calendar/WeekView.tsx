@@ -1,22 +1,37 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { CalendarEvent } from '@/types';
+import { CalendarEvent, FirstDay, WeekendDays } from '@/types';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { useLocale } from 'next-intl';
 
 interface WeekViewProps {
   calendarId: string;
   events: CalendarEvent[];
   locale?: string;
+  firstDay?: FirstDay;
+  weekendDays?: WeekendDays;
 }
 
-export function WeekView({ calendarId, events, locale = 'en' }: WeekViewProps) {
+export function WeekView({
+  calendarId,
+  events,
+  locale = 'en',
+  firstDay = 0,
+  weekendDays = 'sat-sun',
+}: WeekViewProps) {
   const router = useRouter();
+  const siteLocale = useLocale();
   const calendarRef = useRef<FullCalendar>(null);
+
+  // Compute hidden days based on weekend configuration
+  // FullCalendar uses 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday
+  const hiddenDays: number[] = [];
+  // We don't hide weekend days — we show all 7 days
+  // But we do configure which days count as weekends for styling
 
   const fcEvents = events.map((event) => ({
     id: event.id,
@@ -36,11 +51,11 @@ export function WeekView({ calendarId, events, locale = 'en' }: WeekViewProps) {
 
   const handleEventClick = (info: any) => {
     const eventId = info.event.id;
-    router.push(`/en/calendar/${calendarId}/event/${eventId}`);
+    router.push(`/${siteLocale}/calendar/${calendarId}/event/${eventId}`);
   };
 
   return (
-    <div className="rounded-sm border bg-card p-4">
+    <div className="rounded-xl border bg-card p-4">
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin]}
@@ -54,6 +69,8 @@ export function WeekView({ calendarId, events, locale = 'en' }: WeekViewProps) {
         eventClick={handleEventClick}
         direction={locale === 'he' ? 'rtl' : 'ltr'}
         locale={locale}
+        firstDay={firstDay}
+        hiddenDays={hiddenDays}
         height="auto"
         slotMinTime="07:00:00"
         slotMaxTime="22:00:00"

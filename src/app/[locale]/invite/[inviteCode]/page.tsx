@@ -17,12 +17,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Lock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
-const passwordSchema = z.object({
-  password: z.string().min(1, 'Password is required'),
-});
-
-type PasswordFormData = z.infer<typeof passwordSchema>;
+type PasswordFormData = { password: string };
 
 export default function InvitePage() {
   const params = useParams();
@@ -33,6 +31,14 @@ export default function InvitePage() {
   const [joining, setJoining] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const inviteCode = params.inviteCode as string;
+  const t = useTranslations('invite');
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+
+  const passwordSchema = z.object({
+    password: z.string().min(1, t('passwordFieldRequired')),
+  });
 
   const { register, handleSubmit, formState: { errors } } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
@@ -59,24 +65,24 @@ export default function InvitePage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push(`/en/auth/login`);
+      router.push(`/${locale}/auth/login`);
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, locale]);
 
   const handleJoinWithoutPassword = async () => {
     if (!user || !calendar) return;
     setJoining(true);
     try {
       if (calendar.members.includes(user.uid)) {
-        toast.success('You are already a member of this calendar!');
-        router.push(`/en/calendar/${calendar.id}`);
+        toast.success(t('alreadyMember'));
+        router.push(`/${locale}/calendar/${calendar.id}`);
         return;
       }
       await addMember(calendar.id, user.uid);
-      toast.success('Successfully joined the calendar!');
-      router.push(`/en/calendar/${calendar.id}`);
+      toast.success(t('joinSuccess'));
+      router.push(`/${locale}/calendar/${calendar.id}`);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to join calendar');
+      toast.error(error.message || t('joinFailed'));
     } finally {
       setJoining(false);
     }
@@ -93,13 +99,13 @@ export default function InvitePage() {
       });
       const response = result.data as { success: boolean };
       if (response.success) {
-        toast.success('Successfully joined the calendar!');
-        router.push(`/en/calendar/${calendar.id}`);
+        toast.success(t('joinSuccess'));
+        router.push(`/${locale}/calendar/${calendar.id}`);
       } else {
-        toast.error('Incorrect password. Please try again.');
+        toast.error(t('invalidPassword'));
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to verify password');
+      toast.error(error.message || t('joinFailed'));
     } finally {
       setJoining(false);
     }
@@ -128,14 +134,14 @@ export default function InvitePage() {
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-sm bg-destructive/10">
               <AlertCircle className="h-6 w-6 text-destructive" />
             </div>
-            <CardTitle>Calendar Not Found</CardTitle>
+            <CardTitle>{t('notFound')}</CardTitle>
             <CardDescription>
-              This invite link may be invalid or expired.
+              {t('notFoundDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/en/dashboard">Go to Dashboard</Link>
+              <Link href={`/${locale}/dashboard`}>{tCommon('goToDashboard')}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -147,7 +153,7 @@ export default function InvitePage() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-muted-foreground">Joining calendar...</span>
+        <span className="ml-2 text-muted-foreground">{t('joining')}</span>
       </div>
     );
   }
@@ -161,19 +167,19 @@ export default function InvitePage() {
           </div>
           <CardTitle>{calendar.title}</CardTitle>
           <CardDescription>
-            This calendar is password-protected. Enter the password to join.
+            {t('passwordRequired')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleJoinWithPassword)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{tAuth('password')}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter the calendar password"
+                placeholder={t('passwordPlaceholder')}
                 {...register('password')}
-                aria-label="Calendar password"
+                aria-label={t('passwordPlaceholder')}
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
@@ -181,7 +187,7 @@ export default function InvitePage() {
             </div>
             <Button type="submit" className="w-full" disabled={joining}>
               {joining && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Join Calendar
+              {t('join')}
             </Button>
           </form>
         </CardContent>

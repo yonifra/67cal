@@ -8,6 +8,8 @@ import { InviteModal } from '@/components/invite/InviteModal';
 import { Calendar as CalendarIcon, Users, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 interface CalendarCardProps {
   calendar: Calendar;
@@ -23,6 +25,10 @@ const themeColors: Record<string, string> = {
 };
 
 export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps) {
+  const td = useTranslations('dashboard');
+  const tn = useTranslations('nav');
+  const locale = useLocale();
+
   const createdDate = calendar.createdAt?.toDate
     ? format(calendar.createdAt.toDate(), 'MMM d, yyyy')
     : '';
@@ -35,7 +41,7 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
             <CalendarIcon className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">
               <Link
-                href={`/en/calendar/${calendar.id}`}
+                href={`/${locale}/calendar/${calendar.id}`}
                 className="hover:underline"
               >
                 {calendar.title}
@@ -56,18 +62,18 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <span className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" />
-            {calendar.members?.length || 0} members
+            {td('members', { count: calendar.members?.length || 0 })}
           </span>
-          {createdDate && <span>Created {createdDate}</span>}
+          {createdDate && <span>{td('createdOn', { date: createdDate })}</span>}
         </div>
       </CardContent>
       {isOwner && (
         <CardFooter className="flex gap-2 pt-0">
           <InviteModal inviteCode={calendar.inviteCode} calendarTitle={calendar.title} />
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/en/calendar/${calendar.id}/settings`}>
+            <Link href={`/${locale}/calendar/${calendar.id}/settings`}>
               <Settings className="mr-1 h-3.5 w-3.5" />
-              Settings
+              {tn('settings')}
             </Link>
           </Button>
           {onDelete && (

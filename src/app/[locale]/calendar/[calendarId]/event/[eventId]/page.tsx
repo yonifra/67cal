@@ -30,6 +30,8 @@ import {
 import Link from 'next/link';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 function EventDetailContent() {
   const params = useParams();
@@ -41,6 +43,10 @@ function EventDetailContent() {
   const [loading, setLoading] = useState(true);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [fileRefreshKey, setFileRefreshKey] = useState(0);
+  const t = useTranslations('event');
+  const tFiles = useTranslations('files');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   useEffect(() => {
     async function fetch() {
@@ -48,7 +54,7 @@ function EventDetailContent() {
         const ev = await getEvent(calendarId, eventId);
         setEvent(ev);
       } catch {
-        toast.error('Failed to load event');
+        toast.error(t('loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -62,9 +68,9 @@ function EventDetailContent() {
       setEvent((prev) =>
         prev ? { ...prev, status: 'cancelled', cancelReason: reason } : null
       );
-      toast.success('Event cancelled');
+      toast.success(t('eventCancelled'));
     } catch {
-      toast.error('Failed to cancel event');
+      toast.error(t('cancelFailed'));
     }
   };
 
@@ -79,9 +85,9 @@ function EventDetailContent() {
   if (!event || !calendar) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-xl font-semibold mb-2">Event not found</h2>
+        <h2 className="text-xl font-semibold mb-2">{t('notFound')}</h2>
         <Button asChild>
-          <Link href={`/en/calendar/${calendarId}`}>Back to Calendar</Link>
+          <Link href={`/${locale}/calendar/${calendarId}`}>{tCommon('backToCalendar')}</Link>
         </Button>
       </div>
     );
@@ -92,12 +98,12 @@ function EventDetailContent() {
   const endDate = event.endTime?.toDate ? event.endTime.toDate() : new Date();
 
   return (
-    <ThemeProvider theme={calendar.theme}>
+    <ThemeProvider theme={calendar.theme} colorMode={calendar.colorMode || 'light'}>
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         <Button variant="ghost" asChild className="mb-6">
-          <Link href={`/en/calendar/${calendarId}`}>
+          <Link href={`/${locale}/calendar/${calendarId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Calendar
+            {tCommon('backToCalendar')}
           </Link>
         </Button>
 
@@ -114,7 +120,7 @@ function EventDetailContent() {
                 {isCancelled && (
                   <Badge variant="destructive" className="text-sm">
                     <Ban className="mr-1 h-3 w-3" />
-                    Cancelled
+                    {t('status.cancelled')}
                   </Badge>
                 )}
               </div>
@@ -123,7 +129,7 @@ function EventDetailContent() {
               )}
               {isCancelled && event.cancelReason && (
                 <div className="mt-2 rounded-sm bg-destructive/15 px-3 py-2 text-sm text-destructive">
-                  <strong>Reason:</strong> {event.cancelReason}
+                  <strong>{t('reason')}</strong> {event.cancelReason}
                 </div>
               )}
             </div>
@@ -132,9 +138,9 @@ function EventDetailContent() {
               {isOwner && !isCancelled && (
                 <>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/en/calendar/${calendarId}/event/${eventId}/edit`}>
+                    <Link href={`/${locale}/calendar/${calendarId}/event/${eventId}/edit`}>
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      {tCommon('edit')}
                     </Link>
                   </Button>
                   <Button
@@ -144,7 +150,7 @@ function EventDetailContent() {
                     onClick={() => setCancelModalOpen(true)}
                   >
                     <Ban className="mr-2 h-4 w-4" />
-                    Cancel
+                    {tCommon('cancel')}
                   </Button>
                 </>
               )}
@@ -184,7 +190,7 @@ function EventDetailContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <FileText className="h-5 w-5" />
-                Files
+                {tFiles('title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

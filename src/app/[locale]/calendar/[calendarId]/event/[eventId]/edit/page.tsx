@@ -13,6 +13,8 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 function EditEventContent() {
   const params = useParams();
@@ -22,6 +24,9 @@ function EditEventContent() {
   const { calendar, loading: calLoading, isOwner } = useCalendar(calendarId);
   const [event, setEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
+  const t = useTranslations('event');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   useEffect(() => {
     async function fetch() {
@@ -29,7 +34,7 @@ function EditEventContent() {
         const ev = await getEvent(calendarId, eventId);
         setEvent(ev);
       } catch {
-        toast.error('Failed to load event');
+        toast.error(t('loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -48,9 +53,9 @@ function EditEventContent() {
   if (!event || !isOwner) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-xl font-semibold mb-2">Event not found</h2>
+        <h2 className="text-xl font-semibold mb-2">{t('notFound')}</h2>
         <Button asChild>
-          <Link href={`/en/calendar/${calendarId}`}>Back to Calendar</Link>
+          <Link href={`/${locale}/calendar/${calendarId}`}>{tCommon('backToCalendar')}</Link>
         </Button>
       </div>
     );
@@ -59,10 +64,10 @@ function EditEventContent() {
   const handleSubmit = async (data: EventFormData) => {
     try {
       await updateEvent(calendarId, eventId, data);
-      toast.success('Event updated!');
-      router.push(`/en/calendar/${calendarId}/event/${eventId}`);
+      toast.success(t('eventUpdated'));
+      router.push(`/${locale}/calendar/${calendarId}/event/${eventId}`);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update event');
+      toast.error(error.message || tCommon('error'));
     }
   };
 
@@ -76,9 +81,9 @@ function EditEventContent() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Button variant="ghost" asChild className="mb-6">
-        <Link href={`/en/calendar/${calendarId}/event/${eventId}`}>
+        <Link href={`/${locale}/calendar/${calendarId}/event/${eventId}`}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Event
+          {tCommon('backToEvent')}
         </Link>
       </Button>
       <EventForm

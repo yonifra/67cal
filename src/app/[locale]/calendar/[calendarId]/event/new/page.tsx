@@ -11,12 +11,17 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 function NewEventContent() {
   const params = useParams();
   const router = useRouter();
   const calendarId = params.calendarId as string;
   const { calendar, loading, isOwner } = useCalendar(calendarId);
+  const t = useTranslations('event');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
 
   if (loading) {
     return (
@@ -29,8 +34,8 @@ function NewEventContent() {
   if (!calendar || !isOwner) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
-        <p className="text-muted-foreground">Only the calendar owner can create events.</p>
+        <h2 className="text-xl font-semibold mb-2">{t('accessDenied')}</h2>
+        <p className="text-muted-foreground">{t('accessDeniedDesc')}</p>
       </div>
     );
   }
@@ -38,19 +43,19 @@ function NewEventContent() {
   const handleSubmit = async (data: EventFormData) => {
     try {
       await createEvent(calendarId, data);
-      toast.success('Event created successfully!');
-      router.push(`/en/calendar/${calendarId}`);
+      toast.success(t('eventCreated'));
+      router.push(`/${locale}/calendar/${calendarId}`);
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create event');
+      toast.error(error.message || tCommon('error'));
     }
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Button variant="ghost" asChild className="mb-6">
-        <Link href={`/en/calendar/${calendarId}`}>
+        <Link href={`/${locale}/calendar/${calendarId}`}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Calendar
+          {tCommon('backToCalendar')}
         </Link>
       </Button>
       <EventForm onSubmit={handleSubmit} />

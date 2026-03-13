@@ -2,6 +2,9 @@ import { Timestamp } from 'firebase/firestore';
 
 export type Theme = 'kids' | 'teen' | 'adult' | 'minimal';
 export type Language = 'en' | 'he';
+export type ColorMode = 'light' | 'dark';
+export type FirstDay = 0 | 1; // 0 = Sunday, 1 = Monday
+export type WeekendDays = 'sat-sun' | 'fri-sat';
 export type MeetingProvider = 'zoom' | 'meet' | 'teams' | 'other';
 export type EventStatus = 'active' | 'cancelled';
 export type AuthorRole = 'teacher' | 'pupil';
@@ -14,6 +17,9 @@ export interface Calendar {
   ownerId: string;
   theme: Theme;
   language: Language;
+  colorMode: ColorMode;
+  firstDay: FirstDay;
+  weekendDays: WeekendDays;
   passwordHash: string | null;
   inviteCode: string;
   createdAt: Timestamp;
@@ -60,6 +66,9 @@ export interface CalendarFormData {
   description: string;
   theme: Theme;
   language: Language;
+  colorMode: ColorMode;
+  firstDay: FirstDay;
+  weekendDays: WeekendDays;
   password?: string;
 }
 

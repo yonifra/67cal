@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Video, Monitor, MessageSquare, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface MeetingLinkButtonProps {
   meetingLink: string;
@@ -33,16 +34,18 @@ const providerColors: Record<MeetingProvider, string> = {
 };
 
 export function MeetingLinkButton({ meetingLink, provider }: MeetingLinkButtonProps) {
+  const t = useTranslations('event');
+
   if (!meetingLink) return null;
 
   return (
     <Button
       className={cn('gap-2', providerColors[provider])}
       onClick={() => window.open(meetingLink, '_blank')}
-      aria-label={`Join ${getMeetingProviderLabel(provider)} meeting`}
+      aria-label={`${t('joinMeeting')} ${getMeetingProviderLabel(provider)}`}
     >
       {getProviderIcon(provider)}
-      Join {getMeetingProviderLabel(provider)}
+      {t('joinMeeting')}
     </Button>
   );
 }

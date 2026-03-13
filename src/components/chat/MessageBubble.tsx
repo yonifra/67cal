@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface MessageBubbleProps {
   message: Message;
@@ -21,6 +22,7 @@ export function MessageBubble({
   canDelete,
   onDelete,
 }: MessageBubbleProps) {
+  const t = useTranslations('chat');
   const isTeacherMessage = message.authorRole === 'teacher';
   const timestamp = message.createdAt?.toDate
     ? format(message.createdAt.toDate(), 'HH:mm')
@@ -59,7 +61,7 @@ export function MessageBubble({
                   : 'bg-primary/10 text-primary'
               )}
             >
-              Teacher
+              {t('teacherRole')}
             </span>
           )}
         </div>
@@ -84,7 +86,7 @@ export function MessageBubble({
                   : 'hover:bg-muted-foreground/20 text-muted-foreground'
               )}
               onClick={() => onDelete(message.id)}
-              aria-label="Delete message"
+              aria-label={t('deleteMessage')}
             >
               <Trash2 className="h-3 w-3" />
             </Button>

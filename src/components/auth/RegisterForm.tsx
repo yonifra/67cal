@@ -14,22 +14,33 @@ import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
-const registerSchema = z.object({
-  displayName: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Please confirm your password'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = {
+  displayName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
 
 export function RegisterForm() {
+  const t = useTranslations('auth');
+  const tc = useTranslations('common');
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const registerSchema = z.object({
+    displayName: z.string().min(2, t('errors.nameMinLength')),
+    email: z.string().email(t('errors.invalidEmail')),
+    password: z.string().min(6, t('errors.weakPassword')),
+    confirmPassword: z.string().min(6, t('errors.confirmPasswordRequired')),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t('errors.passwordMismatch'),
+    path: ['confirmPassword'],
+  });
+
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
@@ -38,15 +49,15 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       await signUp(data.email, data.password, data.displayName);
-      toast.success('Account created successfully!');
-      router.push('/en/dashboard');
+      toast.success(t('accountCreated'));
+      router.push(`/${locale}/dashboard`);
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
-        toast.error('An account with this email already exists');
+        toast.error(t('errors.emailInUse'));
       } else if (error.code === 'auth/weak-password') {
-        toast.error('Password is too weak. Please use a stronger password');
+        toast.error(t('errors.weakPassword'));
       } else {
-        toast.error(error.message || 'Failed to create account');
+        toast.error(error.message || t('errors.generic'));
       }
     } finally {
       setIsLoading(false);
@@ -57,10 +68,10 @@ export function RegisterForm() {
     setIsLoading(true);
     try {
       await signInWithGoogle();
-      toast.success('Welcome!');
-      router.push('/en/dashboard');
+      toast.success(t('welcome'));
+      router.push(`/${locale}/dashboard`);
     } catch (error: any) {
-      toast.error(error.message || 'Google sign-in failed');
+      toast.error(error.message || t('errors.googleFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -69,58 +80,58 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle className="font-heading text-2xl font-bold tracking-tight">Create an Account</CardTitle>
-        <CardDescription className="text-muted-foreground">Enter your details to get started</CardDescription>
+        <CardTitle className="font-heading text-2xl font-bold tracking-tight">{t('registerTitle')}</CardTitle>
+        <CardDescription className="text-muted-foreground">{t('registerSubtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="displayName">Full Name</Label>
+            <Label htmlFor="displayName">{t('displayName')}</Label>
             <Input
               id="displayName"
               type="text"
-              placeholder="John Doe"
+              placeholder={t('displayNamePlaceholder')}
               {...register('displayName')}
-              aria-label="Full name"
+              aria-label={t('displayName')}
             />
             {errors.displayName && (
               <p className="text-sm text-destructive">{errors.displayName.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('email')}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t('emailPlaceholder')}
               {...register('email')}
-              aria-label="Email address"
+              aria-label={t('email')}
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••"
+              placeholder={t('passwordPlaceholder')}
               {...register('password')}
-              aria-label="Password"
+              aria-label={t('password')}
             />
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="••••••"
+              placeholder={t('passwordPlaceholder')}
               {...register('confirmPassword')}
-              aria-label="Confirm password"
+              aria-label={t('confirmPassword')}
             />
             {errors.confirmPassword && (
               <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
@@ -128,12 +139,12 @@ export function RegisterForm() {
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign Up
+            {t('register')}
           </Button>
         </form>
         <div className="my-4 flex items-center gap-4">
           <Separator className="flex-1" />
-          <span className="text-sm text-muted-foreground">or</span>
+          <span className="text-sm text-muted-foreground">{tc('or')}</span>
           <Separator className="flex-1" />
         </div>
         <Button
@@ -149,14 +160,14 @@ export function RegisterForm() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Continue with Google
+          {t('continueWith', { provider: 'Google' })}
         </Button>
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
-          <Link href="/en/auth/login" className="font-medium text-primary hover:underline">
-            Log In
+          {t('hasAccount')}{' '}
+          <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
+            {t('login')}
           </Link>
         </p>
       </CardFooter>

@@ -12,6 +12,7 @@ import { MessageSquare, Loader2 } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { AuthorRole, Message } from '@/types';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 interface ChatThreadProps {
   calendarId: string;
@@ -19,13 +20,17 @@ interface ChatThreadProps {
   isOwner: boolean;
 }
 
-function groupMessagesByDate(messages: Message[]): Map<string, Message[]> {
+function groupMessagesByDate(
+  messages: Message[],
+  todayLabel: string,
+  yesterdayLabel: string
+): Map<string, Message[]> {
   const groups = new Map<string, Message[]>();
   for (const msg of messages) {
     const date = msg.createdAt?.toDate ? msg.createdAt.toDate() : new Date();
     let label: string;
-    if (isToday(date)) label = 'Today';
-    else if (isYesterday(date)) label = 'Yesterday';
+    if (isToday(date)) label = todayLabel;
+    else if (isYesterday(date)) label = yesterdayLabel;
     else label = format(date, 'MMMM d, yyyy');
 
     if (!groups.has(label)) groups.set(label, []);
@@ -35,6 +40,7 @@ function groupMessagesByDate(messages: Message[]): Map<string, Message[]> {
 }
 
 export function ChatThread({ calendarId, eventId, isOwner }: ChatThreadProps) {
+  const t = useTranslations('chat');
   const { messages, loading } = useMessages(calendarId, eventId);
   const user = useAuthStore((s) => s.user);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -55,26 +61,26 @@ export function ChatThread({ calendarId, eventId, isOwner }: ChatThreadProps) {
         text,
       });
     } catch (error: any) {
-      toast.error('Failed to send message');
+      toast.error(t('sendFailed'));
     }
   };
 
   const handleDelete = async (messageId: string) => {
     try {
       await deleteMessage(calendarId, eventId, messageId);
-      toast.success('Message deleted');
+      toast.success(t('messageDeleted'));
     } catch {
-      toast.error('Failed to delete message');
+      toast.error(t('deleteFailed'));
     }
   };
 
-  const grouped = groupMessagesByDate(messages);
+  const grouped = groupMessagesByDate(messages, t('today'), t('yesterday'));
 
   return (
     <div className="flex h-[500px] flex-col rounded-sm border bg-card">
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <MessageSquare className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-semibold">Chat</h3>
+        <h3 className="text-sm font-semibold">{t('title')}</h3>
         <span className="text-xs text-muted-foreground">({messages.length})</span>
       </div>
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
@@ -85,8 +91,8 @@ export function ChatThread({ calendarId, eventId, isOwner }: ChatThreadProps) {
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center gap-2">
             <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
-            <p className="text-sm text-muted-foreground">No messages yet</p>
-            <p className="text-xs text-muted-foreground">Start the conversation!</p>
+            <p className="text-sm text-muted-foreground">{t('noMessages')}</p>
+            <p className="text-xs text-muted-foreground">{t('noMessagesDesc')}</p>
           </div>
         ) : (
           <div className="space-y-4">

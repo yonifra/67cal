@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CancelEventModalProps {
   open: boolean;
@@ -27,6 +28,7 @@ export function CancelEventModal({
   onConfirm,
   eventTitle,
 }: CancelEventModalProps) {
+  const t = useTranslations('event');
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -46,26 +48,25 @@ export function CancelEventModal({
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cancel Event</DialogTitle>
+          <DialogTitle>{t('cancel')}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to cancel &quot;{eventTitle}&quot;? This will notify all
-            participants.
+            {t('cancelConfirm')}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="cancelReason">Cancellation Reason</Label>
+          <Label htmlFor="cancelReason">{t('cancelReason')}</Label>
           <Textarea
             id="cancelReason"
-            placeholder="Why is this event being cancelled?"
+            placeholder={t('cancelReasonPlaceholder')}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={3}
-            aria-label="Cancellation reason"
+            aria-label={t('cancelReason')}
           />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={loading}>
-            Keep Event
+            {t('keepEvent')}
           </Button>
           <Button
             variant="destructive"
@@ -73,7 +74,7 @@ export function CancelEventModal({
             disabled={!reason.trim() || loading}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Cancel Event
+            {t('cancel')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -138,11 +138,11 @@
 
 /* Theme: Teen - Bold, modern, dark accents */
 [data-theme="teen"] {
-  --primary: oklch(0.55 0.25 270);      /* vivid purple */
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.6 0.2 200);      /* electric blue */
-  --secondary-foreground: oklch(1 0 0);
-  --accent: oklch(0.7 0.22 150);        /* neon green */
+  --primary: oklch(0.72 0.2 270);       /* bright vivid purple — high contrast on dark bg */
+  --primary-foreground: oklch(0.1 0 0);
+  --secondary: oklch(0.7 0.18 200);     /* bright electric blue */
+  --secondary-foreground: oklch(0.1 0 0);
+  --accent: oklch(0.75 0.2 150);        /* neon green */
   --accent-foreground: oklch(0.1 0 0);
   --background: oklch(0.14 0.005 270);  /* near-black purple */
   --foreground: oklch(0.95 0 0);
@@ -218,4 +218,74 @@
   html[dir="rtl"] h6 {
     @apply font-hebrew;
   }
+}
+
+/* FullCalendar theme integration — inherit from CSS custom properties */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-text-color: var(--primary-foreground);
+  --fc-button-hover-bg-color: var(--primary);
+  --fc-button-hover-border-color: var(--primary);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+  --fc-today-bg-color: var(--accent);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-page-bg-color: var(--card);
+  --fc-event-bg-color: var(--primary);
+  --fc-event-border-color: var(--primary);
+  --fc-event-text-color: var(--primary-foreground);
+}
+
+.fc .fc-col-header-cell {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion {
+  color: var(--muted-foreground);
+}
+
+.fc .fc-toolbar-title {
+  color: var(--foreground);
+}
+
+.fc .fc-daygrid-day-number {
+  color: var(--foreground);
+}
+
+.fc .fc-scrollgrid {
+  border-color: var(--border);
+}
+
+.fc td,
+.fc th {
+  border-color: var(--border);
+}
+
+.fc .fc-timegrid-slot {
+  border-color: var(--border);
+}
+
+.fc .fc-timegrid-col {
+  background-color: var(--card);
+}
+
+.fc .fc-day-today {
+  background-color: var(--accent) !important;
+}
+
+.fc .fc-button {
+  border-radius: var(--radius);
+}
+
+.fc .fc-button:focus {
+  box-shadow: 0 0 0 2px var(--ring);
 }

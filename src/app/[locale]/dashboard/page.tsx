@@ -13,12 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 function DashboardContent() {
   const [ownedCalendars, setOwnedCalendars] = useState<Calendar[]>([]);
   const [memberCalendars, setMemberCalendars] = useState<Calendar[]>([]);
   const [loading, setLoading] = useState(true);
   const user = useAuthStore((s) => s.user);
+  const t = useTranslations('dashboard');
+  const tCal = useTranslations('calendar');
+  const locale = useLocale();
 
   const fetchCalendars = async () => {
     if (!user) return;
@@ -33,7 +38,7 @@ function DashboardContent() {
       setMemberCalendars(member.filter((c) => c.ownerId !== user.uid));
     } catch (error) {
       console.error('Error fetching calendars:', error);
-      toast.error('Failed to load calendars');
+      toast.error(t('loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -44,13 +49,13 @@ function DashboardContent() {
   }, [user]);
 
   const handleDelete = async (calendarId: string) => {
-    if (!confirm('Are you sure you want to delete this calendar? This action cannot be undone.')) return;
+    if (!confirm(t('deleteConfirmMsg'))) return;
     try {
       await deleteCalendar(calendarId);
       setOwnedCalendars((prev) => prev.filter((c) => c.id !== calendarId));
-      toast.success('Calendar deleted');
+      toast.success(t('calendarDeleted'));
     } catch {
-      toast.error('Failed to delete calendar');
+      toast.error(t('deleteFailed'));
     }
   };
 
@@ -66,13 +71,13 @@ function DashboardContent() {
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">My Calendars</h1>
-          <p className="text-muted-foreground mt-1">Manage your class schedules</p>
+          <h1 className="font-heading text-3xl font-bold tracking-tight">{t('title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
         </div>
         <Button asChild>
-          <Link href="/en/calendar/new">
+          <Link href={`/${locale}/calendar/new`}>
             <Plus className="mr-2 h-4 w-4" />
-            Create Calendar
+            {t('createCalendar')}
           </Link>
         </Button>
       </div>
@@ -80,10 +85,10 @@ function DashboardContent() {
       <Tabs defaultValue="owned" className="space-y-6">
         <TabsList>
           <TabsTrigger value="owned">
-            My Calendars ({ownedCalendars.length})
+            {t('ownedTab')} ({ownedCalendars.length})
           </TabsTrigger>
           <TabsTrigger value="joined">
-            Joined ({memberCalendars.length})
+            {t('joinedTab')} ({memberCalendars.length})
           </TabsTrigger>
         </TabsList>
 
@@ -107,9 +112,9 @@ function DashboardContent() {
         <TabsContent value="joined">
           {memberCalendars.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-muted-foreground">No calendars joined yet</p>
+              <p className="text-muted-foreground">{t('noJoinedCalendars')}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Ask your teacher for an invite link to join a calendar.
+                {t('noJoinedCalendarsDesc')}
               </p>
             </div>
           ) : (

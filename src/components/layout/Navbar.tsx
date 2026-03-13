@@ -16,18 +16,24 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 export function Navbar() {
+  const tn = useTranslations('nav');
+  const ta = useTranslations('auth');
+  const tc = useTranslations('common');
+  const locale = useLocale();
   const user = useAuthStore((s) => s.user);
   const router = useRouter();
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      toast.success('Signed out successfully');
-      router.push('/en/auth/login');
+      toast.success(tn('signedOut'));
+      router.push(`/${locale}/auth/login`);
     } catch {
-      toast.error('Failed to sign out');
+      toast.error(tn('signOutFailed'));
     }
   };
 
@@ -38,9 +44,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4">
-        <Link href="/en/dashboard" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+        <Link href={`/${locale}/dashboard`} className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Calendar className="h-5 w-5 text-primary" />
-          <span className="font-heading text-lg font-bold tracking-tight">67Cal</span>
+          <span className="font-heading text-lg font-bold tracking-tight">{tc('appName')}</span>
         </Link>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -58,31 +64,31 @@ export function Navbar() {
               <DropdownMenuContent align="end" className="w-56">
                 <div className="flex items-center gap-2 p-2">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user.displayName || 'User'}</p>
+                    <p className="text-sm font-medium">{user.displayName || tn('user')}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/en/dashboard">
+                  <Link href={`/${locale}/dashboard`}>
                     <Calendar className="mr-2 h-4 w-4" />
-                    Dashboard
+                    {tn('dashboard')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {tn('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" asChild>
-                <Link href="/en/auth/login">Log In</Link>
+                <Link href={`/${locale}/auth/login`}>{ta('login')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/en/auth/register">Sign Up</Link>
+                <Link href={`/${locale}/auth/register`}>{ta('register')}</Link>
               </Button>
             </div>
           )}

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Video, Monitor, MessageSquare, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface EventCardProps {
   event: CalendarEvent;
@@ -25,6 +26,7 @@ function getProviderIcon(provider: MeetingProvider) {
 }
 
 export function EventCard({ event, onClick }: EventCardProps) {
+  const t = useTranslations('event');
   const isCancelled = event.status === 'cancelled';
   const startTime = event.startTime?.toDate ? format(event.startTime.toDate(), 'HH:mm') : '';
   const endTime = event.endTime?.toDate ? format(event.endTime.toDate(), 'HH:mm') : '';
@@ -56,7 +58,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
         {isCancelled && (
           <Badge variant="destructive" className="h-4 text-[9px] px-1">
             <Ban className="h-2 w-2 mr-0.5" />
-            Cancelled
+            {t('status.cancelled')}
           </Badge>
         )}
       </div>

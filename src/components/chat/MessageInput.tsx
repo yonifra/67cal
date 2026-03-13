@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface MessageInputProps {
   onSend: (text: string) => Promise<void>;
@@ -11,6 +12,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ onSend, disabled }: MessageInputProps) {
+  const t = useTranslations('chat');
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -39,17 +41,17 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder={t('placeholder')}
         className="min-h-[40px] max-h-[120px] resize-none"
         rows={1}
         disabled={disabled}
-        aria-label="Message input"
+        aria-label={t('messageInput')}
       />
       <Button
         size="icon"
         onClick={handleSend}
         disabled={!text.trim() || sending || disabled}
-        aria-label="Send message"
+        aria-label={t('sendMessage')}
       >
         <Send className="h-4 w-4" />
       </Button>

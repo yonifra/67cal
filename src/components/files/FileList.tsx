@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Download, Trash2, FileText, File as FileIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 interface FileListProps {
   calendarId: string;
@@ -28,6 +29,8 @@ function getFileIcon(type: string) {
 }
 
 export function FileList({ calendarId, eventId, isOwner, refreshKey = 0 }: FileListProps) {
+  const t = useTranslations('files');
+  const tc = useTranslations('common');
   const [files, setFiles] = useState<FileAttachment[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -49,14 +52,14 @@ export function FileList({ calendarId, eventId, isOwner, refreshKey = 0 }: FileL
   }, [calendarId, eventId, refreshKey]);
 
   const handleDelete = async (file: FileAttachment) => {
-    if (!confirm('Delete this file?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     setDeleting(file.id);
     try {
       await deleteFile(calendarId, eventId, file.id, file.storagePath);
       setFiles((prev) => prev.filter((f) => f.id !== file.id));
-      toast.success('File deleted');
+      toast.success(t('deleteSuccess'));
     } catch {
-      toast.error('Failed to delete file');
+      toast.error(t('deleteFailed'));
     } finally {
       setDeleting(null);
     }
@@ -74,9 +77,9 @@ export function FileList({ calendarId, eventId, isOwner, refreshKey = 0 }: FileL
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
         <FileText className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-sm text-muted-foreground">No files uploaded</p>
+        <p className="text-sm text-muted-foreground">{t('noFiles')}</p>
         {isOwner && (
-          <p className="text-xs text-muted-foreground">Upload materials for this event.</p>
+          <p className="text-xs text-muted-foreground">{t('noFilesDesc')}</p>
         )}
       </div>
     );
@@ -107,7 +110,7 @@ export function FileList({ calendarId, eventId, isOwner, refreshKey = 0 }: FileL
               size="icon"
               className="h-8 w-8"
               onClick={() => window.open(file.downloadUrl, '_blank')}
-              aria-label={`Download ${file.name}`}
+              aria-label={`${tc('download')} ${file.name}`}
             >
               <Download className="h-4 w-4" />
             </Button>
@@ -118,7 +121,7 @@ export function FileList({ calendarId, eventId, isOwner, refreshKey = 0 }: FileL
                 className="h-8 w-8 text-destructive hover:text-destructive"
                 onClick={() => handleDelete(file)}
                 disabled={deleting === file.id}
-                aria-label={`Delete ${file.name}`}
+                aria-label={`${t('delete')} ${file.name}`}
               >
                 {deleting === file.id ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Upload, Loader2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useTranslations } from 'next-intl';
 
 interface FileUploaderProps {
   calendarId: string;
@@ -22,6 +23,7 @@ const ACCEPTED_TYPES = {
 };
 
 export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUploaderProps) {
+  const t = useTranslations('files');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const user = useAuthStore((s) => s.user);
@@ -31,7 +33,7 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
 
     for (const file of acceptedFiles) {
       if (file.size > MAX_SIZE) {
-        toast.error(`${file.name} is too large. Maximum size is 20MB.`);
+        toast.error(t('errors.tooLarge', { name: file.name }));
         continue;
       }
 
@@ -40,17 +42,17 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
 
       try {
         await uploadFile(calendarId, eventId, file, user.uid, (p) => setProgress(p));
-        toast.success(`${file.name} uploaded successfully`);
+        toast.success(t('uploadSuccess', { name: file.name }));
         onUploadComplete();
       } catch (error: any) {
-        toast.error(`Failed to upload ${file.name}`);
+        toast.error(t('errors.uploadFailed', { name: file.name }));
         console.error(error);
       } finally {
         setUploading(false);
         setProgress(0);
       }
     }
-  }, [calendarId, eventId, user, onUploadComplete]);
+  }, [calendarId, eventId, user, onUploadComplete, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -70,12 +72,12 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
         uploading && 'pointer-events-none opacity-60'
       )}
     >
-      <input {...getInputProps()} aria-label="Upload file" />
+      <input {...getInputProps()} aria-label={t('upload')} />
       {uploading ? (
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">
-            Uploading... {Math.round(progress)}%
+            {t('uploading', { percent: Math.round(progress).toString() })}
           </p>
           <div className="h-2 w-48 rounded-sm bg-muted overflow-hidden">
             <div
@@ -88,10 +90,10 @@ export function FileUploader({ calendarId, eventId, onUploadComplete }: FileUplo
         <div className="flex flex-col items-center gap-2">
           <Upload className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm font-medium">
-            {isDragActive ? 'Drop files here' : 'Drag & drop files here, or click to browse'}
+            {isDragActive ? t('dropHere') : t('dragDrop')}
           </p>
           <p className="text-xs text-muted-foreground">
-            PDF, DOC, DOCX (max 20MB)
+            {t('acceptedTypes')}
           </p>
         </div>
       )}

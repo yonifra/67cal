@@ -6,16 +6,21 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, MessageSquare, FileText, ArrowRight, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 
 export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const t = useTranslations('home');
+  const tAuth = useTranslations('auth');
+  const locale = useLocale();
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/en/dashboard');
+      router.push(`/${locale}/dashboard`);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, locale]);
 
   if (loading) {
     return (
@@ -42,28 +47,26 @@ export default function HomePage() {
           </div>
 
           <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-6">
-            Home Learning
+            {t('heroTitle1')}
             <br />
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Scheduler
+              {t('heroTitle2')}
             </span>
           </h1>
 
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed mb-10 md:text-xl">
-            Create and manage weekly class schedules for remote learning.
-            Share calendars with pupils via links or QR codes, chat in real-time,
-            and share materials — all in one place.
+            {t('heroSubtitle')}
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button size="lg" asChild className="group">
-              <Link href="/en/auth/register">
-                Get Started
+              <Link href={`/${locale}/auth/register`}>
+                {t('getStarted')}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/en/auth/login">Log In</Link>
+              <Link href={`/${locale}/auth/login`}>{tAuth('login')}</Link>
             </Button>
           </div>
         </div>
@@ -75,34 +78,34 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
               <Sparkles className="h-3.5 w-3.5" />
-              Features
+              {t('featuresBadge')}
             </div>
             <h2 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
-              Everything you need for{' '}
-              <span className="text-primary">remote learning</span>
+              {t('featuresTitle')}{' '}
+              <span className="text-primary">{t('featuresTitleAccent')}</span>
             </h2>
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <FeatureCard
               icon={<Calendar className="h-6 w-6" />}
-              title="Weekly Calendars"
-              description="Create beautiful weekly schedules with multiple themes for any audience."
+              title={t('weeklyCalendars')}
+              description={t('weeklyCalendarsDesc')}
             />
             <FeatureCard
               icon={<Users className="h-6 w-6" />}
-              title="Easy Sharing"
-              description="Invite pupils with a link or QR code. Optional password protection."
+              title={t('easySharing')}
+              description={t('easySharingDesc')}
             />
             <FeatureCard
               icon={<MessageSquare className="h-6 w-6" />}
-              title="Real-time Chat"
-              description="Per-event chat threads keep discussions organized and focused."
+              title={t('realtimeChat')}
+              description={t('realtimeChatDesc')}
             />
             <FeatureCard
               icon={<FileText className="h-6 w-6" />}
-              title="File Sharing"
-              description="Upload and share PDFs and documents directly within events."
+              title={t('fileSharing')}
+              description={t('fileSharingDesc')}
             />
           </div>
         </div>
@@ -110,7 +113,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 px-4 py-8 text-center text-sm text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} 67Cal. Built for teachers and pupils.</p>
+        <p>{t('footer', { year: new Date().getFullYear() })}</p>
       </footer>
     </div>
   );
