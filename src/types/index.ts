@@ -7,8 +7,17 @@ export type FirstDay = 0 | 1; // 0 = Sunday, 1 = Monday
 export type WeekendDays = 'sat-sun' | 'fri-sat';
 export type MeetingProvider = 'zoom' | 'meet' | 'teams' | 'other';
 export type EventStatus = 'active' | 'cancelled';
+export type UserRole = 'teacher' | 'pupil';
 export type AuthorRole = 'teacher' | 'pupil';
 export type FileType = 'pdf' | 'docx' | 'doc';
+
+export interface UserProfile {
+  uid: string;
+  displayName: string;
+  email: string;
+  role: UserRole;
+  createdAt: Timestamp;
+}
 
 export interface Calendar {
   id: string;

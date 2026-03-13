@@ -21,16 +21,19 @@ function DashboardContent() {
   const [memberCalendars, setMemberCalendars] = useState<Calendar[]>([]);
   const [loading, setLoading] = useState(true);
   const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
   const t = useTranslations('dashboard');
+  const ta = useTranslations('auth');
   const tCal = useTranslations('calendar');
   const locale = useLocale();
+  const isTeacher = role === 'teacher';
 
   const fetchCalendars = async () => {
     if (!user) return;
     try {
       setLoading(true);
       const [owned, member] = await Promise.all([
-        getOwnedCalendars(user.uid),
+        isTeacher ? getOwnedCalendars(user.uid) : Promise.resolve([]),
         getMemberCalendars(user.uid),
       ]);
       setOwnedCalendars(owned);
@@ -72,49 +75,73 @@ function DashboardContent() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-heading text-3xl font-bold tracking-tight">{t('title')}</h1>
-          <p className="text-muted-foreground mt-1">{t('subtitle')}</p>
+          <p className="text-muted-foreground mt-1">
+            {isTeacher ? t('subtitle') : ta('pupilDashboardSubtitle')}
+          </p>
         </div>
-        <Button asChild>
-          <Link href={`/${locale}/calendar/new`}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('createCalendar')}
-          </Link>
-        </Button>
+        {isTeacher && (
+          <Button asChild>
+            <Link href={`/${locale}/calendar/new`}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t('createCalendar')}
+            </Link>
+          </Button>
+        )}
       </div>
 
-      <Tabs defaultValue="owned" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="owned">
-            {t('ownedTab')} ({ownedCalendars.length})
-          </TabsTrigger>
-          <TabsTrigger value="joined">
-            {t('joinedTab')} ({memberCalendars.length})
-          </TabsTrigger>
-        </TabsList>
+      {isTeacher ? (
+        <Tabs defaultValue="owned" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="owned">
+              {t('ownedTab')} ({ownedCalendars.length})
+            </TabsTrigger>
+            <TabsTrigger value="joined">
+              {t('joinedTab')} ({memberCalendars.length})
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="owned">
-          {ownedCalendars.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {ownedCalendars.map((cal) => (
-                <CalendarCard
-                  key={cal.id}
-                  calendar={cal}
-                  isOwner
-                  onDelete={() => handleDelete(cal.id)}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+          <TabsContent value="owned">
+            {ownedCalendars.length === 0 ? (
+              <EmptyState />
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {ownedCalendars.map((cal) => (
+                  <CalendarCard
+                    key={cal.id}
+                    calendar={cal}
+                    isOwner
+                    onDelete={() => handleDelete(cal.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        <TabsContent value="joined">
+          <TabsContent value="joined">
+            {memberCalendars.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <p className="text-muted-foreground">{t('noJoinedCalendars')}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('noJoinedCalendarsDesc')}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {memberCalendars.map((cal) => (
+                  <CalendarCard key={cal.id} calendar={cal} isOwner={false} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        /* Pupil view: only joined calendars, no tabs */
+        <div>
           {memberCalendars.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/80 p-16 text-center">
               <p className="text-muted-foreground">{t('noJoinedCalendars')}</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {t('noJoinedCalendarsDesc')}
+                {ta('pupilNoCalendarsDesc')}
               </p>
             </div>
           ) : (
@@ -124,8 +151,8 @@ function DashboardContent() {
               ))}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

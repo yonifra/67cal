@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CalendarFormData } from '@/types';
 import { createCalendar } from '@/lib/firestore/calendars';
@@ -17,9 +18,18 @@ import { useLocale } from 'next-intl';
 function NewCalendarContent() {
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
   const t = useTranslations('calendar');
+  const ta = useTranslations('auth');
   const tCommon = useTranslations('common');
   const locale = useLocale();
+
+  useEffect(() => {
+    if (role === 'pupil') {
+      toast.error(ta('pupilCannotCreate'));
+      router.push(`/${locale}/dashboard`);
+    }
+  }, [role, router, locale, ta]);
 
   const handleSubmit = async (data: CalendarFormData) => {
     if (!user) return;
@@ -31,6 +41,8 @@ function NewCalendarContent() {
       toast.error(error.message || tCommon('error'));
     }
   };
+
+  if (role === 'pupil') return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">

@@ -13,6 +13,13 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/calendars/$(calId)).data.members;
     }
 
+    match /users/{userId} {
+      allow read: if isAuth();
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isAuth() && request.auth.uid == userId
+        && request.resource.data.uid == resource.data.uid;  // prevent uid tampering
+    }
+
     match /calendars/{calId} {
       // Use resource.data (not get()) so collection queries work.
       // Three query patterns are used by the app:

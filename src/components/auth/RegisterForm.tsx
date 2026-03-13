@@ -6,16 +6,19 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { signUp, signInWithGoogle } from '@/lib/auth';
+import { createUserProfile } from '@/lib/firestore/users';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Loader2 } from 'lucide-react';
+import { Loader2, GraduationCap, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
+import { UserRole } from '@/types';
+import { useAuthStore } from '@/stores/authStore';
 
 type RegisterFormData = {
   displayName: string;
@@ -29,7 +32,9 @@ export function RegisterForm() {
   const tc = useTranslations('common');
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>('teacher');
   const router = useRouter();
+  const setRole = useAuthStore((s) => s.setRole);
 
   const registerSchema = z.object({
     displayName: z.string().min(2, t('errors.nameMinLength')),
@@ -48,10 +53,21 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
-      await signUp(data.email, data.password, data.displayName);
+      // Set role in store BEFORE signUp so that when onAuthStateChanged fires
+      // the useAuth hook sees the role is already set and skips the Firestore
+      // fetch (which would fail because the profile doc doesn't exist yet).
+      setRole(selectedRole);
+      const result = await signUp(data.email, data.password, data.displayName);
+      await createUserProfile(result.user.uid, {
+        displayName: data.displayName,
+        email: data.email,
+        role: selectedRole,
+      });
       toast.success(t('accountCreated'));
       router.push(`/${locale}/dashboard`);
     } catch (error: any) {
+      // Reset role on failure so the user isn't stuck
+      setRole(null);
       if (error.code === 'auth/email-already-in-use') {
         toast.error(t('errors.emailInUse'));
       } else if (error.code === 'auth/weak-password') {
@@ -85,6 +101,35 @@ export function RegisterForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label>{t('role')}</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setSelectedRole('teacher')}
+                className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 transition-all ${
+                  selectedRole === 'teacher'
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <GraduationCap className="h-5 w-5" />
+                <span className="text-sm font-medium">{t('teacher')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedRole('pupil')}
+                className={`flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 transition-all ${
+                  selectedRole === 'pupil'
+                    ? 'border-primary bg-primary/5 text-primary'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <BookOpen className="h-5 w-5" />
+                <span className="text-sm font-medium">{t('pupil')}</span>
+              </button>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="displayName">{t('displayName')}</Label>
             <Input

@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Calendar, LogOut, Settings, User, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
@@ -25,6 +26,7 @@ export function Navbar() {
   const tc = useTranslations('common');
   const locale = useLocale();
   const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -66,6 +68,11 @@ export function Navbar() {
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{user.displayName || tn('user')}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
+                    {role && (
+                      <Badge variant={role === 'teacher' ? 'default' : 'secondary'} className="w-fit mt-0.5">
+                        {role === 'teacher' ? ta('teacher') : ta('pupil')}
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <DropdownMenuSeparator />
