@@ -34,7 +34,7 @@
     "ical-generator": "^10.0.0",
     "lucide-react": "^0.577.0",
     "nanoid": "^5.1.6",
-    "next": "16.1.6",
+    "next": "15.5.12",
     "next-intl": "^4.8.3",
     "qrcode.react": "^4.2.0",
     "react": "19.2.3",
@@ -55,7 +55,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "15.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

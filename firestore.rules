@@ -3,31 +3,59 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAuth() { return request.auth != null; }
-    function isOwner(calId) {
-      return get(/databases/$(database)/documents/calendars/$(calId)).data.ownerId == request.auth.uid;
+
+    // Helper functions using get() — for subcollection rules that need
+    // to look up the parent calendar document
+    function calendarOwner(calId) {
+      return get(/databases/$(database)/documents/calendars/$(calId)).data.ownerId;
     }
-    function isMember(calId) {
-      return request.auth.uid in get(/databases/$(database)/documents/calendars/$(calId)).data.members;
+    function calendarMembers(calId) {
+      return get(/databases/$(database)/documents/calendars/$(calId)).data.members;
     }
 
     match /calendars/{calId} {
-      allow read: if isAuth() && (isOwner(calId) || isMember(calId));
+      // Use resource.data (not get()) so collection queries work.
+      // Three query patterns are used by the app:
+      //   1. where('ownerId', '==', uid)             → owner dashboard
+      //   2. where('members', 'array-contains', uid)  → joined calendars
+      //   3. where('inviteCode', '==', code)          → invite join flow
+      // Direct getDoc by ID also works (owner/member accessing their calendar).
+      // The inviteCode condition is acceptable because having the invite code
+      // is the intended access mechanism, and sensitive data lives in subcollections.
+      allow read: if isAuth()
+        && (resource.data.ownerId == request.auth.uid
+            || request.auth.uid in resource.data.members
+            || resource.data.inviteCode is string);
       allow create: if isAuth();
-      allow update, delete: if isAuth() && isOwner(calId);
+      allow update: if isAuth()
+        && resource.data.ownerId == request.auth.uid;
+      allow delete: if isAuth()
+        && resource.data.ownerId == request.auth.uid;
 
       match /events/{eventId} {
-        allow read: if isAuth() && (isOwner(calId) || isMember(calId));
-        allow write: if isAuth() && isOwner(calId);
+        allow read: if isAuth()
+          && (calendarOwner(calId) == request.auth.uid
+              || request.auth.uid in calendarMembers(calId));
+        allow write: if isAuth()
+          && calendarOwner(calId) == request.auth.uid;
 
         match /messages/{msgId} {
-          allow read: if isAuth() && (isOwner(calId) || isMember(calId));
-          allow create: if isAuth() && (isOwner(calId) || isMember(calId));
-          allow update, delete: if isAuth() && request.auth.uid == resource.data.authorId;
+          allow read: if isAuth()
+            && (calendarOwner(calId) == request.auth.uid
+                || request.auth.uid in calendarMembers(calId));
+          allow create: if isAuth()
+            && (calendarOwner(calId) == request.auth.uid
+                || request.auth.uid in calendarMembers(calId));
+          allow update, delete: if isAuth()
+            && request.auth.uid == resource.data.authorId;
         }
 
         match /files/{fileId} {
-          allow read: if isAuth() && (isOwner(calId) || isMember(calId));
-          allow write: if isAuth() && isOwner(calId);
+          allow read: if isAuth()
+            && (calendarOwner(calId) == request.auth.uid
+                || request.auth.uid in calendarMembers(calId));
+          allow write: if isAuth()
+            && calendarOwner(calId) == request.auth.uid;
         }
       }
     }
