@@ -33,6 +33,7 @@ function createEventSchema(t: (key: string) => string) {
       endTime: z.string().min(1, t('endTimeRequired')),
       meetingLink: z.string(),
       repeatUntil: z.string(),
+      repeatDays: z.array(z.number()),
     })
     .refine(
       (data) => {
@@ -52,6 +53,16 @@ function createEventSchema(t: (key: string) => string) {
         return true;
       },
       { message: t('errors.repeatUntilBeforeStart'), path: ['repeatUntil'] }
+    )
+    .refine(
+      (data) => {
+        // When repeatUntil is set, at least one day must be selected
+        if (data.repeatUntil) {
+          return data.repeatDays.length > 0;
+        }
+        return true;
+      },
+      { message: t('errors.repeatDaysRequired'), path: ['repeatDays'] }
     );
 }
 
@@ -67,6 +78,9 @@ export function EventForm({ initialData, onSubmit, isEditing, isRecurringEvent }
   const tc = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState<'none' | 'weekly'>('none');
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+
+  const DAY_KEYS = ['daySun', 'dayMon', 'dayTue', 'dayWed', 'dayThu', 'dayFri', 'daySat'] as const;
 
   const eventSchema = createEventSchema(t);
 
@@ -85,6 +99,7 @@ export function EventForm({ initialData, onSubmit, isEditing, isRecurringEvent }
       endTime: initialData?.endTime || '',
       meetingLink: initialData?.meetingLink || '',
       repeatUntil: initialData?.repeatUntil || '',
+      repeatDays: initialData?.repeatDays || [],
     },
   });
 
@@ -95,12 +110,30 @@ export function EventForm({ initialData, onSubmit, isEditing, isRecurringEvent }
     setRecurrenceType(value as 'none' | 'weekly');
     if (value === 'none') {
       setValue('repeatUntil', '');
+      setSelectedDays([]);
+      setValue('repeatDays', []);
+    } else if (value === 'weekly') {
+      // Auto-select the weekday of the current start time
+      const startTime = watch('startTime');
+      if (startTime) {
+        const dayOfWeek = new Date(startTime).getDay();
+        setSelectedDays([dayOfWeek]);
+        setValue('repeatDays', [dayOfWeek]);
+      }
     }
   };
 
+  const toggleDay = (day: number) => {
+    const newDays = selectedDays.includes(day)
+      ? selectedDays.filter((d) => d !== day)
+      : [...selectedDays, day].sort();
+    setSelectedDays(newDays);
+    setValue('repeatDays', newDays);
+  };
+
   const handleFormSubmit = async (data: FormValues) => {
-    // If recurrence is "weekly" but repeatUntil is empty, show validation
-    if (recurrenceType === 'weekly' && !data.repeatUntil) {
+    // If recurrence is "weekly" but repeatUntil is empty or no days selected, show validation
+    if (recurrenceType === 'weekly' && (!data.repeatUntil || data.repeatDays.length === 0)) {
       return;
     }
 
@@ -214,6 +247,30 @@ export function EventForm({ initialData, onSubmit, isEditing, isRecurringEvent }
                   </SelectContent>
                 </Select>
               </div>
+
+              {recurrenceType === 'weekly' && (
+                <div className="space-y-2">
+                  <Label>{t('repeatDaysLabel')}</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {DAY_KEYS.map((dayKey, index) => (
+                      <Button
+                        key={dayKey}
+                        type="button"
+                        variant={selectedDays.includes(index) ? 'default' : 'outline'}
+                        size="sm"
+                        className="min-w-[3rem]"
+                        onClick={() => toggleDay(index)}
+                      >
+                        {t(dayKey)}
+                      </Button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('repeatDaysHint')}</p>
+                  {recurrenceType === 'weekly' && selectedDays.length === 0 && (
+                    <p className="text-sm text-destructive">{t('errors.repeatDaysRequired')}</p>
+                  )}
+                </div>
+              )}
 
               {recurrenceType === 'weekly' && (
                 <div className="space-y-2">

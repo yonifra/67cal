@@ -92,4 +92,5 @@ export interface EventFormData {
   endTime: string;
   meetingLink: string;
   repeatUntil: string;
+  repeatDays: number[];  // 0=Sun, 1=Mon, ..., 6=Sat — empty array = no repeat
 }

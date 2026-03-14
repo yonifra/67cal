@@ -34,7 +34,7 @@ export async function createEvent(
   const durationMs = endDate.getTime() - startDate.getTime();
 
   // Non-recurring event
-  if (!data.repeatUntil) {
+  if (!data.repeatDays?.length || !data.repeatUntil) {
     const docRef = await addDoc(eventsRef(calendarId), {
       title: data.title,
       description: data.description,
@@ -52,42 +52,52 @@ export async function createEvent(
     return docRef.id;
   }
 
-  // Recurring event — expand weekly occurrences
+  // Recurring event — expand occurrences on selected days of the week
   const repeatUntilDate = new Date(data.repeatUntil + 'T23:59:59');
   const recurrenceGroupId = crypto.randomUUID();
   const batch = writeBatch(db);
-  const MAX_OCCURRENCES = 52;
+  const MAX_DAYS = 364; // 52 weeks cap
 
   let firstDocId: string | null = null;
-  let currentStart = new Date(startDate);
   let index = 0;
 
-  while (currentStart <= repeatUntilDate && index < MAX_OCCURRENCES) {
-    const currentEnd = new Date(currentStart.getTime() + durationMs);
-    const docRefForOccurrence = doc(eventsRef(calendarId));
+  // Iterate day-by-day from start date up to repeatUntilDate (capped at MAX_DAYS)
+  const currentDay = new Date(startDate);
+  const endCap = new Date(startDate.getTime() + MAX_DAYS * 24 * 60 * 60 * 1000);
+  const effectiveEnd = repeatUntilDate < endCap ? repeatUntilDate : endCap;
 
-    if (index === 0) {
-      firstDocId = docRefForOccurrence.id;
+  while (currentDay <= effectiveEnd) {
+    if (data.repeatDays.includes(currentDay.getDay())) {
+      // Build start/end for this occurrence, preserving the original time-of-day
+      const occurrenceStart = new Date(currentDay);
+      occurrenceStart.setHours(startDate.getHours(), startDate.getMinutes(), startDate.getSeconds(), startDate.getMilliseconds());
+      const occurrenceEnd = new Date(occurrenceStart.getTime() + durationMs);
+
+      const docRefForOccurrence = doc(eventsRef(calendarId));
+      if (index === 0) {
+        firstDocId = docRefForOccurrence.id;
+      }
+
+      batch.set(docRefForOccurrence, {
+        title: data.title,
+        description: data.description,
+        startTime: Timestamp.fromDate(occurrenceStart),
+        endTime: Timestamp.fromDate(occurrenceEnd),
+        meetingLink: data.meetingLink,
+        meetingProvider,
+        status: 'active',
+        cancelReason: null,
+        recurrenceGroupId,
+        recurrenceIndex: index,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      index++;
     }
 
-    batch.set(docRefForOccurrence, {
-      title: data.title,
-      description: data.description,
-      startTime: Timestamp.fromDate(currentStart),
-      endTime: Timestamp.fromDate(currentEnd),
-      meetingLink: data.meetingLink,
-      meetingProvider,
-      status: 'active',
-      cancelReason: null,
-      recurrenceGroupId,
-      recurrenceIndex: index,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-
-    // Advance by 7 days
-    currentStart = new Date(currentStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-    index++;
+    // Advance by 1 day
+    currentDay.setDate(currentDay.getDate() + 1);
   }
 
   await batch.commit();
@@ -125,8 +135,8 @@ export async function updateEvent(
   eventId: string,
   data: Partial<EventFormData>
 ): Promise<void> {
-  // Strip repeatUntil — it's only used during creation, not updates
-  const { repeatUntil, ...rest } = data as EventFormData;
+  // Strip repeatUntil and repeatDays — they're only used during creation, not updates
+  const { repeatUntil, repeatDays, ...rest } = data as EventFormData;
   const updateData: Record<string, any> = {
     ...rest,
     updatedAt: serverTimestamp(),

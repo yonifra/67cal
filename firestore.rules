@@ -38,6 +38,7 @@ service cloud.firestore {
       allow read: if isAuth()
         && (resource.data.ownerId == request.auth.uid
             || request.auth.uid in resource.data.members
+            || request.auth.uid in resource.data.collaborators
             || resource.data.inviteCode is string
             || resource.data.collaboratorInviteCode is string);
       allow create: if isAuth();

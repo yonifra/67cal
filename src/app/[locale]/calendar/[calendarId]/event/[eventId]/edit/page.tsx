@@ -94,6 +94,7 @@ function EditEventContent() {
           endTime,
           meetingLink: event.meetingLink,
           repeatUntil: '',
+          repeatDays: [],
         }}
         onSubmit={handleSubmit}
         isEditing
