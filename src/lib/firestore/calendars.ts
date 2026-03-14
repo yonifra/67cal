@@ -94,6 +94,13 @@ export async function addMember(calendarId: string, userId: string): Promise<voi
   });
 }
 
+export async function removeMember(calendarId: string, userId: string): Promise<void> {
+  await updateDoc(doc(db, 'calendars', calendarId), {
+    members: arrayRemove(userId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 export async function getCalendarByInviteCode(inviteCode: string): Promise<Calendar | null> {
   const q = query(calendarsRef, where('inviteCode', '==', inviteCode));
   const snapshot = await getDocs(q);

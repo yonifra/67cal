@@ -204,7 +204,15 @@
     "noCollaborators": "אין עדיין שותפים",
     "noCollaboratorsDesc": "שתפו את קישור ההזמנה עם מורים אחרים.",
     "viewOnlyNotice": "יש לכם גישת צפייה בלבד כשותף.",
-    "collaboratorBadge": "שותף"
+    "collaboratorBadge": "שותף",
+    "pupils": "תלמידים",
+    "pupilsDesc": "תלמידים שהצטרפו ללוח באמצעות קישור ההזמנה.",
+    "noPupils": "אין עדיין תלמידים",
+    "noPupilsDesc": "שתפו את קישור ההזמנה כדי שתלמידים יוכלו להצטרף.",
+    "removePupil": "הסרת תלמיד",
+    "removePupilConfirm": "האם אתם בטוחים שברצונכם להסיר את {name} מהלוח הזה? הם יאבדו גישה לכל האירועים.",
+    "pupilRemoved": "התלמיד הוסר",
+    "pupilRemoveFailed": "הסרת התלמיד נכשלה"
   },
   "event": {
     "create": "צור אירוע",

@@ -204,7 +204,15 @@
     "noCollaborators": "No collaborators yet",
     "noCollaboratorsDesc": "Share the invite link with other teachers.",
     "viewOnlyNotice": "You have view-only access as a collaborator.",
-    "collaboratorBadge": "Collaborator"
+    "collaboratorBadge": "Collaborator",
+    "pupils": "Pupils",
+    "pupilsDesc": "Pupils who have joined this calendar via the invite link.",
+    "noPupils": "No pupils yet",
+    "noPupilsDesc": "Share the invite link so pupils can join.",
+    "removePupil": "Remove Pupil",
+    "removePupilConfirm": "Are you sure you want to remove {name} from this calendar? They will lose access to all events.",
+    "pupilRemoved": "Pupil removed",
+    "pupilRemoveFailed": "Failed to remove pupil"
   },
   "event": {
     "create": "Create Event",

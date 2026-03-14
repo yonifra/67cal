@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { CalendarForm } from '@/components/calendar/CalendarForm';
 import { CollaboratorManager } from '@/components/calendar/CollaboratorManager';
+import { MemberList } from '@/components/calendar/MemberList';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -127,6 +128,13 @@ function SettingsContent() {
           <Separator className="my-8" />
 
           <CollaboratorManager
+            calendar={calendar}
+            onUpdate={fetchCalendar}
+          />
+
+          <Separator className="my-8" />
+
+          <MemberList
             calendar={calendar}
             onUpdate={fetchCalendar}
           />
