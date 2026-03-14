@@ -9,7 +9,7 @@ import { WeekView } from '@/components/calendar/WeekView';
 import { InviteModal } from '@/components/invite/InviteModal';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Plus, Settings, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Settings, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
@@ -19,7 +19,7 @@ function CalendarContent() {
   const router = useRouter();
   const calendarId = params.calendarId as string;
   const { calendar, loading, isOwner, canEdit } = useCalendar(calendarId);
-  const { events, loading: eventsLoading } = useEvents(calendarId);
+  const { events, loading: eventsLoading, error: eventsError } = useEvents(calendarId);
   const t = useTranslations('calendar');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -93,6 +93,15 @@ function CalendarContent() {
         {eventsLoading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : eventsError ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <AlertCircle className="h-10 w-10 text-destructive mb-4" />
+            <h2 className="text-lg font-semibold mb-2">{t('eventsLoadError')}</h2>
+            <p className="text-sm text-muted-foreground mb-4">{t('eventsLoadErrorDesc')}</p>
+            <Button asChild>
+              <Link href={`/${locale}/dashboard`}>{tCommon('goToDashboard')}</Link>
+            </Button>
           </div>
         ) : (
           <WeekView

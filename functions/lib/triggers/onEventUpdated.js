@@ -36,8 +36,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.onEventUpdated = void 0;
 const firestore_1 = require("firebase-functions/v2/firestore");
 const admin = __importStar(require("firebase-admin"));
-const emailService_1 = require("../services/emailService");
-const eventNotificationEmail_1 = require("../templates/eventNotificationEmail");
 const db = admin.firestore();
 exports.onEventUpdated = (0, firestore_1.onDocumentUpdated)('calendars/{calendarId}/events/{eventId}', async (event) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -53,7 +51,7 @@ exports.onEventUpdated = (0, firestore_1.onDocumentUpdated)('calendars/{calendar
     const cancelled = before.status !== 'cancelled' && after.status === 'cancelled';
     if (!timeChanged && !cancelled)
         return;
-    // Get calendar doc for members list, title, and language
+    // Get calendar doc for members list and title
     const calDoc = await db.collection('calendars').doc(calendarId).get();
     if (!calDoc.exists) {
         console.error(`Calendar ${calendarId} not found`);
@@ -61,7 +59,6 @@ exports.onEventUpdated = (0, firestore_1.onDocumentUpdated)('calendars/{calendar
     }
     const calData = calDoc.data();
     const calendarTitle = calData.title || '';
-    const calendarLanguage = calData.language || 'en';
     const members = calData.members || [];
     // Determine who made the change
     const actorId = after.updatedBy || '';
@@ -78,9 +75,9 @@ exports.onEventUpdated = (0, firestore_1.onDocumentUpdated)('calendars/{calendar
         }
     }
     const eventTitle = after.title || 'Untitled Event';
-    // Determine notification type and build context
+    // Determine notification type
     const notificationType = cancelled ? 'event_cancelled' : 'event_time_changed';
-    // Batch-create notification documents
+    // Batch-create in-app notification documents
     const batch = db.batch();
     for (const recipientId of recipientIds) {
         const notifRef = db.collection('notifications').doc();
@@ -109,50 +106,7 @@ exports.onEventUpdated = (0, firestore_1.onDocumentUpdated)('calendars/{calendar
         batch.set(notifRef, notifData);
     }
     await batch.commit();
-    // Get recipient emails for email notifications
-    const recipientDocs = await Promise.all(recipientIds.map((uid) => db.collection('users').doc(uid).get()));
-    const emailPayloads = [];
-    for (const recipientDoc of recipientDocs) {
-        if (!recipientDoc.exists)
-            continue;
-        const recipientData = recipientDoc.data();
-        const email = recipientData.email;
-        if (!email)
-            continue;
-        let emailContent;
-        if (cancelled) {
-            emailContent = (0, eventNotificationEmail_1.buildCancelledEmail)({
-                eventTitle,
-                calendarTitle,
-                actorName,
-                cancelReason: after.cancelReason || undefined,
-                calendarId,
-                eventId,
-            }, calendarLanguage);
-        }
-        else {
-            emailContent = (0, eventNotificationEmail_1.buildTimeChangedEmail)({
-                eventTitle,
-                calendarTitle,
-                actorName,
-                previousStart: before.startTime.toDate(),
-                newStart: after.startTime.toDate(),
-                previousEnd: before.endTime.toDate(),
-                newEnd: after.endTime.toDate(),
-                calendarId,
-                eventId,
-            }, calendarLanguage);
-        }
-        emailPayloads.push({
-            to: email,
-            subject: emailContent.subject,
-            html: emailContent.html,
-        });
-    }
-    if (emailPayloads.length > 0) {
-        await (0, emailService_1.sendEmails)(emailPayloads);
-    }
     console.log(`Notification: ${notificationType} for event ${eventId} — ` +
-        `${recipientIds.length} notification(s) created, ${emailPayloads.length} email(s) sent`);
+        `${recipientIds.length} notification(s) created`);
 });
 //# sourceMappingURL=onEventUpdated.js.map

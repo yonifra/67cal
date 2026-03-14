@@ -95,6 +95,51 @@ export const joinCalendar = functions.https.onCall(
   }
 );
 
+/**
+ * Join a calendar as a collaborator (teacher).
+ * Validates the collaborator invite code server-side and adds the user
+ * as both a collaborator and member using the Admin SDK.
+ */
+export const joinAsCollaborator = functions.https.onCall(
+  async (data: { calendarId: string; collaboratorInviteCode: string }, context) => {
+    const { calendarId, collaboratorInviteCode } = data;
+
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+    }
+
+    if (!calendarId || !collaboratorInviteCode) {
+      throw new functions.https.HttpsError('invalid-argument', 'Missing calendarId or collaboratorInviteCode');
+    }
+
+    const calendarDoc = await db.collection('calendars').doc(calendarId).get();
+
+    if (!calendarDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Calendar not found');
+    }
+
+    const calendarData = calendarDoc.data()!;
+
+    // Verify the collaborator invite code matches
+    if (calendarData.collaboratorInviteCode !== collaboratorInviteCode) {
+      throw new functions.https.HttpsError('permission-denied', 'Invalid collaborator invite code');
+    }
+
+    // Check if user is already the owner
+    if (calendarData.ownerId === context.auth.uid) {
+      throw new functions.https.HttpsError('already-exists', 'You are the owner of this calendar');
+    }
+
+    await db.collection('calendars').doc(calendarId).update({
+      collaborators: admin.firestore.FieldValue.arrayUnion(context.auth.uid),
+      members: admin.firestore.FieldValue.arrayUnion(context.auth.uid),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return { success: true };
+  }
+);
+
 // Hash password when calendar is created or password is updated
 export const hashCalendarPassword = functions.https.onCall(
   async (data: { password: string }, context) => {

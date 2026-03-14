@@ -121,13 +121,21 @@ export async function getCalendarEvents(calendarId: string): Promise<CalendarEve
 
 export function subscribeToEvents(
   calendarId: string,
-  callback: (events: CalendarEvent[]) => void
+  callback: (events: CalendarEvent[]) => void,
+  onError?: (error: Error) => void
 ): Unsubscribe {
   const q = query(eventsRef(calendarId), orderBy('startTime', 'asc'));
-  return onSnapshot(q, (snapshot) => {
-    const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CalendarEvent));
-    callback(events);
-  });
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+      callback(events);
+    },
+    (error) => {
+      console.error('Error subscribing to events:', error);
+      if (onError) onError(error);
+    }
+  );
 }
 
 export async function updateEvent(

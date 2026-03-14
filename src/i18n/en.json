@@ -184,6 +184,8 @@
     "today": "Today",
     "notFound": "Calendar not found",
     "notFoundDesc": "This calendar may have been deleted or you don't have access.",
+    "eventsLoadError": "Unable to load events",
+    "eventsLoadErrorDesc": "You may not have permission to view this calendar. Please try joining again via the invite link.",
     "dangerZone": "Danger Zone",
     "dangerZoneDesc": "Deleting this calendar will permanently remove all events, messages, and files.",
     "calendarCreated": "Calendar created successfully!",

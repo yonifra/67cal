@@ -68,17 +68,20 @@ service cloud.firestore {
       match /events/{eventId} {
         allow read: if isAuth()
           && (calendarOwner(calId) == request.auth.uid
-              || request.auth.uid in calendarMembers(calId));
+              || request.auth.uid in calendarMembers(calId)
+              || request.auth.uid in calendarCollaborators(calId));
         allow write: if isAuth()
           && canEditCalendar(calId);
 
         match /messages/{msgId} {
           allow read: if isAuth()
             && (calendarOwner(calId) == request.auth.uid
-                || request.auth.uid in calendarMembers(calId));
+                || request.auth.uid in calendarMembers(calId)
+                || request.auth.uid in calendarCollaborators(calId));
           allow create: if isAuth()
             && (calendarOwner(calId) == request.auth.uid
-                || request.auth.uid in calendarMembers(calId));
+                || request.auth.uid in calendarMembers(calId)
+                || request.auth.uid in calendarCollaborators(calId));
           allow update, delete: if isAuth()
             && (request.auth.uid == resource.data.authorId
                 || canEditCalendar(calId));
@@ -87,7 +90,8 @@ service cloud.firestore {
         match /files/{fileId} {
           allow read: if isAuth()
             && (calendarOwner(calId) == request.auth.uid
-                || request.auth.uid in calendarMembers(calId));
+                || request.auth.uid in calendarMembers(calId)
+                || request.auth.uid in calendarCollaborators(calId));
           allow write: if isAuth()
             && canEditCalendar(calId);
         }

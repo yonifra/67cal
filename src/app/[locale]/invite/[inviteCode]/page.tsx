@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Calendar } from '@/types';
-import { getCalendarByInviteCode, getCalendarByCollaboratorInviteCode, addCollaborator } from '@/lib/firestore/calendars';
+import { getCalendarByInviteCode, getCalendarByCollaboratorInviteCode } from '@/lib/firestore/calendars';
 import { getUserProfile } from '@/lib/firestore/users';
 import { useAuth } from '@/hooks/useAuth';
 import { httpsCallable } from 'firebase/functions';
@@ -142,9 +142,18 @@ export default function InvitePage() {
     if (!user || !calendar) return;
     setJoining(true);
     try {
-      await addCollaborator(calendar.id, user.uid);
-      toast.success(t('collaboratorJoinSuccess'));
-      router.push(`/${locale}/calendar/${calendar.id}`);
+      const joinCollaborator = httpsCallable(functions, 'joinAsCollaborator');
+      const result = await joinCollaborator({
+        calendarId: calendar.id,
+        collaboratorInviteCode: inviteCode,
+      });
+      const response = result.data as { success: boolean };
+      if (response.success) {
+        toast.success(t('collaboratorJoinSuccess'));
+        router.push(`/${locale}/calendar/${calendar.id}`);
+      } else {
+        toast.error(t('joinFailed'));
+      }
     } catch (error: any) {
       toast.error(error.message || t('joinFailed'));
     } finally {
