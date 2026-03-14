@@ -25,6 +25,8 @@ export function LanguageSwitcher() {
     const segments = pathname.split('/');
     segments[1] = newLocale;
     const newPath = segments.join('/');
+    // Persist preference in both cookie (for middleware/SSR) and localStorage (for client)
+    document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=${365 * 24 * 60 * 60};SameSite=Lax`;
     localStorage.setItem('preferred-locale', newLocale);
     router.push(newPath);
   };
