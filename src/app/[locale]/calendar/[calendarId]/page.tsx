@@ -48,22 +48,23 @@ function CalendarContent() {
 
   return (
     <ThemeProvider theme={calendar.theme} colorMode={calendar.colorMode || 'light'}>
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" asChild>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+        {/* Header — stacks vertically on mobile */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href={`/${locale}/dashboard`}>
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
-            <div>
-              <h1 className="font-heading text-2xl font-bold tracking-tight">{calendar.title}</h1>
+            <div className="min-w-0">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight truncate">{calendar.title}</h1>
               {calendar.description && (
-                <p className="text-sm text-muted-foreground">{calendar.description}</p>
+                <p className="text-sm text-muted-foreground truncate">{calendar.description}</p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ps-10 sm:ps-0">
             {isOwner && (
               <InviteModal
                 inviteCode={calendar.inviteCode}
@@ -74,14 +75,14 @@ function CalendarContent() {
               <>
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/${locale}/calendar/${calendarId}/settings`}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    {t('settings')}
+                    <Settings className="sm:mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">{t('settings')}</span>
                   </Link>
                 </Button>
                 <Button size="sm" asChild>
                   <Link href={`/${locale}/calendar/${calendarId}/event/new`}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t('addEvent')}
+                    <Plus className="sm:mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">{t('addEvent')}</span>
                   </Link>
                 </Button>
               </>

@@ -110,8 +110,8 @@ function EventDetailContent() {
 
   return (
     <ThemeProvider theme={calendar.theme} colorMode={calendar.colorMode || 'light'}>
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <Button variant="ghost" asChild className="mb-6">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-4xl">
+        <Button variant="ghost" asChild className="mb-4 sm:mb-6">
           <Link href={`/${locale}/calendar/${calendarId}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             {tCommon('backToCalendar')}
@@ -119,12 +119,12 @@ function EventDetailContent() {
         </Button>
 
         {/* Event Header */}
-        <div className="mb-8">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h1
-                  className={`font-heading text-3xl font-bold tracking-tight ${isCancelled ? 'line-through text-muted-foreground' : ''}`}
+                  className={`font-heading text-2xl sm:text-3xl font-bold tracking-tight ${isCancelled ? 'line-through text-muted-foreground' : ''}`}
                 >
                   {event.title}
                 </h1>
@@ -150,14 +150,14 @@ function EventDetailContent() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 ml-4">
+            <div className="flex items-center gap-2">
               <ExportButton event={event} />
               {canEdit && !isCancelled && (
                 <>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/${locale}/calendar/${calendarId}/event/${eventId}/edit`}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      {tCommon('edit')}
+                      <Edit className="sm:mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline">{tCommon('edit')}</span>
                     </Link>
                   </Button>
                   <Button
@@ -166,8 +166,8 @@ function EventDetailContent() {
                     className="text-destructive hover:text-destructive"
                     onClick={() => setCancelModalOpen(true)}
                   >
-                    <Ban className="mr-2 h-4 w-4" />
-                    {tCommon('cancel')}
+                    <Ban className="sm:mr-2 h-4 w-4" />
+                    <span className="hidden sm:inline">{tCommon('cancel')}</span>
                   </Button>
                 </>
               )}

@@ -303,3 +303,69 @@
 .fc .fc-event {
   cursor: pointer;
 }
+
+/* ── Mobile optimizations for FullCalendar ── */
+@media (max-width: 767px) {
+  /* Compact toolbar: smaller title, tighter buttons */
+  .fc .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* Smaller time labels */
+  .fc .fc-timegrid-slot-label-cushion {
+    font-size: 0.65rem;
+    padding: 0 2px;
+  }
+
+  .fc .fc-timegrid-axis-cushion {
+    font-size: 0.65rem;
+  }
+
+  /* Compact column headers */
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.75rem;
+    padding: 4px 2px;
+  }
+
+  /* More visible events — slightly larger text, more padding */
+  .fc .fc-event {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  .fc .fc-event-title {
+    font-weight: 600;
+  }
+
+  /* Reduce time axis width to save space */
+  .fc .fc-timegrid-axis {
+    width: 40px !important;
+  }
+
+  /* Touch-friendly slot height */
+  .fc .fc-timegrid-slot {
+    height: 2.5rem;
+  }
+
+  /* Remove crosshair cursor on mobile (no drag-to-create) */
+  .fc .fc-timegrid-col.fc-day {
+    cursor: default;
+  }
+
+  /* Wrapper padding reduction already handled by Tailwind p-2 */
+  .fc-mobile-wrapper {
+    overflow-x: hidden;
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -30,6 +30,31 @@ export function WeekView({
   const router = useRouter();
   const siteLocale = useLocale();
   const calendarRef = useRef<FullCalendar>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile viewport and switch to day view
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Switch FullCalendar view when mobile state changes
+  const handleWindowResize = useCallback(() => {
+    const calApi = calendarRef.current?.getApi();
+    if (!calApi) return;
+    const mobile = window.innerWidth < 768;
+    const currentView = calApi.view.type;
+    if (mobile && currentView === 'timeGridWeek') {
+      calApi.changeView('timeGridDay');
+    } else if (!mobile && currentView === 'timeGridDay') {
+      calApi.changeView('timeGridWeek');
+    }
+  }, []);
 
   // Compute hidden days based on weekend configuration
   // FullCalendar uses 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday
@@ -79,23 +104,23 @@ export function WeekView({
   };
 
   return (
-    <div className="rounded-xl border bg-card p-4">
+    <div className="rounded-xl border bg-card p-2 sm:p-4 fc-mobile-wrapper">
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
-        initialView="timeGridWeek"
+        initialView={isMobile ? 'timeGridDay' : 'timeGridWeek'}
         locales={[heLocale]}
         locale={locale}
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'timeGridWeek,timeGridDay',
-        }}
+        headerToolbar={isMobile
+          ? { left: 'prev,next', center: 'title', right: 'today' }
+          : { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' }
+        }
         events={fcEvents}
         eventClick={handleEventClick}
         selectable={isOwner}
         selectMirror={isOwner}
         select={handleSelect}
+        windowResize={handleWindowResize}
         direction={locale === 'he' ? 'rtl' : 'ltr'}
         firstDay={firstDay}
         hiddenDays={hiddenDays}

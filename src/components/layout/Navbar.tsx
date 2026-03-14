@@ -44,12 +44,12 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4">
+      <div className="container flex h-14 items-center justify-between px-3 sm:px-4">
         <Link href={`/${locale}/dashboard`} className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Calendar className="h-5 w-5 text-primary" />
-          <span className="font-heading text-lg font-bold tracking-tight">{tc('appName')}</span>
+          <Calendar className="h-5 w-5 text-primary shrink-0" />
+          <span className="font-heading text-lg font-bold tracking-tight hidden xs:inline sm:inline">{tc('appName')}</span>
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <LanguageSwitcher />
           {user ? (
             <>
