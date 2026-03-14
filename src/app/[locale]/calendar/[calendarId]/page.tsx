@@ -48,7 +48,7 @@ function CalendarContent() {
 
   return (
     <ThemeProvider theme={calendar.theme} colorMode={calendar.colorMode || 'light'}>
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
+      <div className="mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Header — stacks vertically on mobile */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
