@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 type FormValues = z.infer<ReturnType<typeof createCalendarSchema>>;
 
@@ -46,7 +46,10 @@ interface CalendarFormProps {
 export function CalendarForm({ initialData, onSubmit, isEditing, disabled }: CalendarFormProps) {
   const t = useTranslations('calendar');
   const tc = useTranslations('common');
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
+
+  const localeWeekendDefault: WeekendDays = locale === 'he' ? 'fri-sat' : 'sat-sun';
 
   const calendarSchema = createCalendarSchema(t);
 
@@ -72,7 +75,7 @@ export function CalendarForm({ initialData, onSubmit, isEditing, disabled }: Cal
       language: initialData?.language || 'en',
       colorMode: initialData?.colorMode || 'light',
       firstDay: initialData?.firstDay ?? 0,
-      weekendDays: initialData?.weekendDays || 'sat-sun',
+      weekendDays: initialData?.weekendDays || localeWeekendDefault,
       password: '',
     },
   });
