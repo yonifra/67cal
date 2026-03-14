@@ -40,22 +40,27 @@ export default async function LocaleLayout({
   const { locale } = await params;
   const messages = await getMessages();
   const isRTL = locale === 'he';
+  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
       <head>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-D34WMHB05X"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-D34WMHB05X');
-          `}
-        </Script>
+        {gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${gaId}');
+              `}
+            </Script>
+          </>
+        )}
       </head>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} ${heebo.variable} ${jetbrainsMono.variable} ${isRTL ? 'font-hebrew' : 'font-sans'} antialiased`}
