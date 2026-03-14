@@ -11,6 +11,7 @@ import { CalendarForm } from '@/components/calendar/CalendarForm';
 import { CollaboratorManager } from '@/components/calendar/CollaboratorManager';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ArrowLeft, Loader2, Trash2, Info } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -26,6 +27,7 @@ function SettingsContent() {
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [isCollaborator, setIsCollaborator] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const t = useTranslations('calendar');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -70,7 +72,6 @@ function SettingsContent() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(t('deleteConfirm'))) return;
     try {
       await deleteCalendar(calendarId);
       toast.success(t('calendarDeleted'));
@@ -137,11 +138,22 @@ function SettingsContent() {
             <p className="text-sm text-muted-foreground mb-4">
               {t('dangerZoneDesc')}
             </p>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
               <Trash2 className="mr-2 h-4 w-4" />
               {t('delete')}
             </Button>
           </div>
+
+          <ConfirmDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            title={t('delete')}
+            description={t('deleteConfirm')}
+            confirmLabel={tCommon('delete')}
+            cancelLabel={tCommon('cancel')}
+            variant="destructive"
+            onConfirm={handleDelete}
+          />
         </>
       )}
     </div>

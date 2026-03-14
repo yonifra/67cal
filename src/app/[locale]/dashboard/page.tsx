@@ -10,6 +10,7 @@ import { CalendarCard } from '@/components/dashboard/CalendarCard';
 import { EmptyState } from '@/components/dashboard/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Plus, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -21,11 +22,13 @@ function DashboardContent() {
   const [memberCalendars, setMemberCalendars] = useState<Calendar[]>([]);
   const [collaboratingCalendars, setCollaboratingCalendars] = useState<Calendar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
   const t = useTranslations('dashboard');
   const ta = useTranslations('auth');
   const tCal = useTranslations('calendar');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const isTeacher = role === 'teacher';
 
@@ -61,7 +64,6 @@ function DashboardContent() {
   }, [user]);
 
   const handleDelete = async (calendarId: string) => {
-    if (!confirm(t('deleteConfirmMsg'))) return;
     try {
       await deleteCalendar(calendarId);
       setOwnedCalendars((prev) => prev.filter((c) => c.id !== calendarId));
@@ -122,7 +124,7 @@ function DashboardContent() {
                     key={cal.id}
                     calendar={cal}
                     isOwner
-                    onDelete={() => handleDelete(cal.id)}
+                    onDelete={() => setDeleteTarget(cal.id)}
                   />
                 ))}
               </div>
@@ -187,6 +189,17 @@ function DashboardContent() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        title={tCal('delete')}
+        description={t('deleteConfirmMsg')}
+        confirmLabel={tCommon('delete')}
+        cancelLabel={tCommon('cancel')}
+        variant="destructive"
+        onConfirm={() => { if (deleteTarget) handleDelete(deleteTarget); }}
+      />
     </div>
   );
 }
