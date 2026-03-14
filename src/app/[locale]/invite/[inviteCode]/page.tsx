@@ -77,9 +77,10 @@ export default function InvitePage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push(`/${locale}/auth/login`);
+      const returnPath = `/${locale}/invite/${inviteCode}`;
+      router.push(`/${locale}/auth/login?redirect=${encodeURIComponent(returnPath)}`);
     }
-  }, [user, authLoading, router, locale]);
+  }, [user, authLoading, router, locale, inviteCode]);
 
   // Validate collaborator eligibility
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, signInWithGoogle } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,8 @@ export function LoginForm() {
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   const loginSchema = z.object({
     email: z.string().email(t('errors.invalidEmail')),
@@ -43,7 +45,7 @@ export function LoginForm() {
     try {
       await signIn(data.email, data.password);
       toast.success(t('welcomeBack'));
-      router.push(`/${locale}/dashboard`);
+      router.push(redirectPath || `/${locale}/dashboard`);
     } catch (error: any) {
       toast.error(error.message || t('errors.invalidCredentials'));
     } finally {
@@ -56,7 +58,7 @@ export function LoginForm() {
     try {
       await signInWithGoogle();
       toast.success(t('welcome'));
-      router.push(`/${locale}/dashboard`);
+      router.push(redirectPath || `/${locale}/dashboard`);
     } catch (error: any) {
       toast.error(error.message || t('errors.googleFailed'));
     } finally {
@@ -127,7 +129,7 @@ export function LoginForm() {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           {t('noAccount')}{' '}
-          <Link href={`/${locale}/auth/register`} className="font-medium text-primary hover:underline">
+          <Link href={`/${locale}/auth/register${redirectPath ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="font-medium text-primary hover:underline">
             {t('register')}
           </Link>
         </p>

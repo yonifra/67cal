@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signUp, signInWithGoogle } from '@/lib/auth';
 import { createUserProfile } from '@/lib/firestore/users';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,8 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>('teacher');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
   const setRole = useAuthStore((s) => s.setRole);
 
   const registerSchema = z.object({
@@ -64,7 +66,7 @@ export function RegisterForm() {
         role: selectedRole,
       });
       toast.success(t('accountCreated'));
-      router.push(`/${locale}/dashboard`);
+      router.push(redirectPath || `/${locale}/dashboard`);
     } catch (error: any) {
       // Reset role on failure so the user isn't stuck
       setRole(null);
@@ -85,7 +87,7 @@ export function RegisterForm() {
     try {
       await signInWithGoogle();
       toast.success(t('welcome'));
-      router.push(`/${locale}/dashboard`);
+      router.push(redirectPath || `/${locale}/dashboard`);
     } catch (error: any) {
       toast.error(error.message || t('errors.googleFailed'));
     } finally {
@@ -211,7 +213,7 @@ export function RegisterForm() {
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
           {t('hasAccount')}{' '}
-          <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
+          <Link href={`/${locale}/auth/login${redirectPath ? `?redirect=${encodeURIComponent(redirectPath)}` : ''}`} className="font-medium text-primary hover:underline">
             {t('login')}
           </Link>
         </p>
