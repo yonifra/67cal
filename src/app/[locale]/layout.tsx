@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { Inter, Heebo, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import Script from 'next/script';
 import { Toaster } from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import '../globals.css';
@@ -42,6 +43,20 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-D34WMHB05X"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-D34WMHB05X');
+          `}
+        </Script>
+      </head>
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} ${heebo.variable} ${jetbrainsMono.variable} ${isRTL ? 'font-hebrew' : 'font-sans'} antialiased`}
       >
