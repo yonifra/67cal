@@ -22,6 +22,7 @@ function EditEventContent() {
   const calendarId = params.calendarId as string;
   const eventId = params.eventId as string;
   const { calendar, loading: calLoading, canEdit } = useCalendar(calendarId);
+  const { user } = useAuth();
   const [event, setEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const t = useTranslations('event');
@@ -63,7 +64,7 @@ function EditEventContent() {
 
   const handleSubmit = async (data: EventFormData) => {
     try {
-      await updateEvent(calendarId, eventId, data);
+      await updateEvent(calendarId, eventId, data, user?.uid);
       toast.success(t('eventUpdated'));
       router.push(`/${locale}/calendar/${calendarId}/event/${eventId}`);
     } catch (error: any) {

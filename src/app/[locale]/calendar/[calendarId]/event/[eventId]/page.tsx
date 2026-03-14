@@ -40,6 +40,7 @@ function EventDetailContent() {
   const calendarId = params.calendarId as string;
   const eventId = params.eventId as string;
   const { calendar, loading: calLoading, isOwner, canEdit } = useCalendar(calendarId);
+  const { user } = useAuth();
   const [event, setEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
@@ -74,7 +75,7 @@ function EventDetailContent() {
 
   const handleCancel = async (reason: string) => {
     try {
-      await cancelEvent(calendarId, eventId, reason);
+      await cancelEvent(calendarId, eventId, reason, user?.uid);
       setEvent((prev) =>
         prev ? { ...prev, status: 'cancelled', cancelReason: reason } : null
       );

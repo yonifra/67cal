@@ -5,6 +5,8 @@ import * as bcrypt from 'bcryptjs';
 admin.initializeApp();
 const db = admin.firestore();
 
+export { onEventUpdated } from './triggers/onEventUpdated';
+
 export const verifyCalendarPassword = functions.https.onCall(
   async (data: { calendarId: string; password: string }, context) => {
     const { calendarId, password } = data;

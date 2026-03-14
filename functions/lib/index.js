@@ -33,12 +33,14 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hashCalendarPassword = exports.verifyCalendarPassword = void 0;
+exports.hashCalendarPassword = exports.verifyCalendarPassword = exports.onEventUpdated = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const bcrypt = __importStar(require("bcryptjs"));
 admin.initializeApp();
 const db = admin.firestore();
+var onEventUpdated_1 = require("./triggers/onEventUpdated");
+Object.defineProperty(exports, "onEventUpdated", { enumerable: true, get: function () { return onEventUpdated_1.onEventUpdated; } });
 exports.verifyCalendarPassword = functions.https.onCall(async (data, context) => {
     const { calendarId, password } = data;
     if (!context.auth) {

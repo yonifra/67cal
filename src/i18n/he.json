@@ -368,5 +368,13 @@
     "styleFunEmoji": "אמוג׳י כיפי",
     "styleBottts": "רובוטים",
     "styleBigSmile": "חיוך גדול"
+  },
+  "notifications": {
+    "title": "התראות",
+    "empty": "אין התראות עדיין",
+    "markAllRead": "סמן הכל כנקרא",
+    "eventCancelled": "\"{event}\" בוטל",
+    "eventTimeChanged": "זמן \"{event}\" שונה",
+    "byActor": "ע\"י {actor} ב{calendar}"
   }
 }

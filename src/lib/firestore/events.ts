@@ -133,7 +133,8 @@ export function subscribeToEvents(
 export async function updateEvent(
   calendarId: string,
   eventId: string,
-  data: Partial<EventFormData>
+  data: Partial<EventFormData>,
+  userId?: string
 ): Promise<void> {
   // Strip repeatUntil and repeatDays — they're only used during creation, not updates
   const { repeatUntil, repeatDays, ...rest } = data as EventFormData;
@@ -141,6 +142,9 @@ export async function updateEvent(
     ...rest,
     updatedAt: serverTimestamp(),
   };
+  if (userId) {
+    updateData.updatedBy = userId;
+  }
   if (data.startTime) {
     updateData.startTime = Timestamp.fromDate(new Date(data.startTime));
   }
@@ -156,13 +160,18 @@ export async function updateEvent(
 export async function cancelEvent(
   calendarId: string,
   eventId: string,
-  reason: string
+  reason: string,
+  userId?: string
 ): Promise<void> {
-  await updateDoc(doc(db, 'calendars', calendarId, 'events', eventId), {
+  const updateData: Record<string, any> = {
     status: 'cancelled',
     cancelReason: reason,
     updatedAt: serverTimestamp(),
-  });
+  };
+  if (userId) {
+    updateData.updatedBy = userId;
+  }
+  await updateDoc(doc(db, 'calendars', calendarId, 'events', eventId), updateData);
 }
 
 export async function getRecurrenceGroupEvents(

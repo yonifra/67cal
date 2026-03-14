@@ -368,5 +368,13 @@
     "styleFunEmoji": "Fun Emoji",
     "styleBottts": "Robots",
     "styleBigSmile": "Big Smile"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read",
+    "eventCancelled": "\"{event}\" was cancelled",
+    "eventTimeChanged": "\"{event}\" time was changed",
+    "byActor": "by {actor} in {calendar}"
   }
 }

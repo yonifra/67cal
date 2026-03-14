@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 
@@ -51,6 +52,8 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           {user ? (
+            <>
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -95,6 +98,7 @@ export function Navbar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" asChild>
