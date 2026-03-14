@@ -116,6 +116,9 @@
     "createdOn": "נוצר ב-{date}",
     "ownedTab": "הלוחות שלי",
     "joinedTab": "לוחות שהצטרפתי",
+    "collaboratingTab": "לוחות בשיתוף",
+    "noCollaboratingCalendars": "אין עדיין לוחות בשיתוף",
+    "noCollaboratingCalendarsDesc": "כאשר מורה ישתף אתכם קישור הזמנה לשיתוף פעולה, הלוח שלו יופיע כאן.",
     "noJoinedCalendars": "לא הצטרפתם עדיין ללוחות",
     "noJoinedCalendarsDesc": "בקשו מהמורה שלכם קישור הזמנה כדי להצטרף ללוח.",
     "loadFailed": "טעינת הלוחות נכשלה",
@@ -186,7 +189,22 @@
     "calendarUpdated": "הלוח עודכן בהצלחה!",
     "calendarDeleted": "הלוח נמחק",
     "loadFailed": "טעינת הלוח נכשלה",
-    "notFoundOrDenied": "הלוח לא נמצא או שאין לכם הרשאה"
+    "notFoundOrDenied": "הלוח לא נמצא או שאין לכם הרשאה",
+    "collaborators": "שותפים",
+    "collaboratorsDesc": "הזמינו מורים אחרים לעזור בניהול הלוח.",
+    "collaboratorInviteLink": "קישור הזמנה לשותפים",
+    "collaboratorInviteLinkDesc": "שתפו קישור זה עם מורים אחרים כדי להזמין אותם כשותפים",
+    "regenerateCode": "חידוש קישור",
+    "regenerateConfirm": "האם אתם בטוחים שברצונכם לחדש את קישור ההזמנה לשותפים? הקישור הישן יפסיק לעבוד.",
+    "codeRegenerated": "קישור ההזמנה לשותפים חודש",
+    "removeCollaborator": "הסרת שותף",
+    "removeCollaboratorConfirm": "האם אתם בטוחים שברצונכם להסיר את {name} כשותף? הם יאבדו גישת עריכה.",
+    "collaboratorRemoved": "השותף הוסר",
+    "collaboratorRemoveFailed": "הסרת השותף נכשלה",
+    "noCollaborators": "אין עדיין שותפים",
+    "noCollaboratorsDesc": "שתפו את קישור ההזמנה עם מורים אחרים.",
+    "viewOnlyNotice": "יש לכם גישת צפייה בלבד כשותף.",
+    "collaboratorBadge": "שותף"
   },
   "event": {
     "create": "צור אירוע",
@@ -232,8 +250,17 @@
     "accessDeniedDesc": "רק בעל הלוח יכול ליצור אירועים.",
     "errors": {
       "endBeforeStart": "שעת הסיום חייבת להיות אחרי שעת ההתחלה",
-      "invalidLink": "נא להזין כתובת URL תקינה"
-    }
+      "invalidLink": "נא להזין כתובת URL תקינה",
+      "repeatUntilRequired": "יש לבחור תאריך סיום לאירוע חוזר",
+      "repeatUntilBeforeStart": "תאריך סיום החזרה חייב להיות אחרי תאריך ההתחלה"
+    },
+    "recurrence": "חזרה",
+    "recurrenceNone": "ללא חזרה",
+    "recurrenceWeekly": "שבועי",
+    "repeatUntil": "חזרה עד",
+    "repeatUntilHint": "האירוע יחזור כל שבוע עד תאריך זה",
+    "recurringBadge": "אירוע חוזר",
+    "recurringOccurrence": "מופע {index} מתוך {total}"
   },
   "chat": {
     "title": "צ׳אט",
@@ -292,7 +319,14 @@
     "invalidPassword": "סיסמה שגויה. נסו שוב.",
     "alreadyMember": "אתם כבר חברים בלוח הזה!",
     "notFound": "הלוח לא נמצא",
-    "notFoundDesc": "קישור ההזמנה הזה עשוי להיות לא תקין או שפג תוקפו."
+    "notFoundDesc": "קישור ההזמנה הזה עשוי להיות לא תקין או שפג תוקפו.",
+    "collaboratorInviteTitle": "הזמנה לשיתוף פעולה",
+    "collaboratorInviteDesc": "הוזמנתם לשתף פעולה בלוח",
+    "joinAsCollaborator": "הצטרפות כשותף",
+    "teacherOnlyError": "רק חשבונות מורים יכולים להיות שותפים.",
+    "alreadyCollaborator": "אתם כבר שותפים בלוח הזה!",
+    "alreadyOwner": "אתם הבעלים של הלוח הזה.",
+    "collaboratorJoinSuccess": "הצטרפתם כשותפים!"
   },
   "errors": {
     "notFound": "הדף לא נמצא",

@@ -7,10 +7,12 @@ import {
   updateDoc,
   query,
   orderBy,
+  where,
   serverTimestamp,
   Timestamp,
   onSnapshot,
   Unsubscribe,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { CalendarEvent, EventFormData } from '@/types';
@@ -24,19 +26,72 @@ export async function createEvent(
   calendarId: string,
   data: EventFormData
 ): Promise<string> {
-  const docRef = await addDoc(eventsRef(calendarId), {
-    title: data.title,
-    description: data.description,
-    startTime: Timestamp.fromDate(new Date(data.startTime)),
-    endTime: Timestamp.fromDate(new Date(data.endTime)),
-    meetingLink: data.meetingLink,
-    meetingProvider: detectMeetingProvider(data.meetingLink),
-    status: 'active',
-    cancelReason: null,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-  return docRef.id;
+  const startDate = new Date(data.startTime);
+  const endDate = new Date(data.endTime);
+  const meetingProvider = detectMeetingProvider(data.meetingLink);
+
+  // Calculate duration in ms to apply to each occurrence
+  const durationMs = endDate.getTime() - startDate.getTime();
+
+  // Non-recurring event
+  if (!data.repeatUntil) {
+    const docRef = await addDoc(eventsRef(calendarId), {
+      title: data.title,
+      description: data.description,
+      startTime: Timestamp.fromDate(startDate),
+      endTime: Timestamp.fromDate(endDate),
+      meetingLink: data.meetingLink,
+      meetingProvider,
+      status: 'active',
+      cancelReason: null,
+      recurrenceGroupId: null,
+      recurrenceIndex: null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  }
+
+  // Recurring event — expand weekly occurrences
+  const repeatUntilDate = new Date(data.repeatUntil + 'T23:59:59');
+  const recurrenceGroupId = crypto.randomUUID();
+  const batch = writeBatch(db);
+  const MAX_OCCURRENCES = 52;
+
+  let firstDocId: string | null = null;
+  let currentStart = new Date(startDate);
+  let index = 0;
+
+  while (currentStart <= repeatUntilDate && index < MAX_OCCURRENCES) {
+    const currentEnd = new Date(currentStart.getTime() + durationMs);
+    const docRefForOccurrence = doc(eventsRef(calendarId));
+
+    if (index === 0) {
+      firstDocId = docRefForOccurrence.id;
+    }
+
+    batch.set(docRefForOccurrence, {
+      title: data.title,
+      description: data.description,
+      startTime: Timestamp.fromDate(currentStart),
+      endTime: Timestamp.fromDate(currentEnd),
+      meetingLink: data.meetingLink,
+      meetingProvider,
+      status: 'active',
+      cancelReason: null,
+      recurrenceGroupId,
+      recurrenceIndex: index,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+
+    // Advance by 7 days
+    currentStart = new Date(currentStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    index++;
+  }
+
+  await batch.commit();
+  return firstDocId!;
 }
 
 export async function getEvent(
@@ -70,8 +125,10 @@ export async function updateEvent(
   eventId: string,
   data: Partial<EventFormData>
 ): Promise<void> {
+  // Strip repeatUntil — it's only used during creation, not updates
+  const { repeatUntil, ...rest } = data as EventFormData;
   const updateData: Record<string, any> = {
-    ...data,
+    ...rest,
     updatedAt: serverTimestamp(),
   };
   if (data.startTime) {
@@ -96,4 +153,17 @@ export async function cancelEvent(
     cancelReason: reason,
     updatedAt: serverTimestamp(),
   });
+}
+
+export async function getRecurrenceGroupEvents(
+  calendarId: string,
+  groupId: string
+): Promise<CalendarEvent[]> {
+  const q = query(
+    eventsRef(calendarId),
+    where('recurrenceGroupId', '==', groupId),
+    orderBy('startTime', 'asc')
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as CalendarEvent));
 }

@@ -9,6 +9,7 @@ import {
   query,
   where,
   arrayUnion,
+  arrayRemove,
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
@@ -35,6 +36,8 @@ export async function createCalendar(
     weekendDays: data.weekendDays || 'sat-sun',
     passwordHash,
     inviteCode: generateInviteCode(),
+    collaborators: [],
+    collaboratorInviteCode: generateInviteCode(),
     members: [ownerId],
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
@@ -97,4 +100,43 @@ export async function getCalendarByInviteCode(inviteCode: string): Promise<Calen
   if (snapshot.empty) return null;
   const docSnap = snapshot.docs[0];
   return { id: docSnap.id, ...docSnap.data() } as Calendar;
+}
+
+export async function addCollaborator(calendarId: string, userId: string): Promise<void> {
+  await updateDoc(doc(db, 'calendars', calendarId), {
+    collaborators: arrayUnion(userId),
+    members: arrayUnion(userId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function removeCollaborator(calendarId: string, userId: string): Promise<void> {
+  await updateDoc(doc(db, 'calendars', calendarId), {
+    collaborators: arrayRemove(userId),
+    members: arrayRemove(userId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function getCalendarByCollaboratorInviteCode(code: string): Promise<Calendar | null> {
+  const q = query(calendarsRef, where('collaboratorInviteCode', '==', code));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const docSnap = snapshot.docs[0];
+  return { id: docSnap.id, ...docSnap.data() } as Calendar;
+}
+
+export async function getCollaboratorCalendars(userId: string): Promise<Calendar[]> {
+  const q = query(calendarsRef, where('collaborators', 'array-contains', userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Calendar));
+}
+
+export async function regenerateCollaboratorInviteCode(calendarId: string): Promise<string> {
+  const newCode = generateInviteCode();
+  await updateDoc(doc(db, 'calendars', calendarId), {
+    collaboratorInviteCode: newCode,
+    updatedAt: serverTimestamp(),
+  });
+  return newCode;
 }

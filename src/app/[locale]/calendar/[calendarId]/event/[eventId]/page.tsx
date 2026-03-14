@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { CalendarEvent } from '@/types';
-import { getEvent, cancelEvent } from '@/lib/firestore/events';
+import { getEvent, cancelEvent, getRecurrenceGroupEvents } from '@/lib/firestore/events';
 import { useCalendar } from '@/hooks/useCalendar';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -26,6 +26,7 @@ import {
   Ban,
   Loader2,
   FileText,
+  Repeat,
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -38,11 +39,12 @@ function EventDetailContent() {
   const router = useRouter();
   const calendarId = params.calendarId as string;
   const eventId = params.eventId as string;
-  const { calendar, loading: calLoading, isOwner } = useCalendar(calendarId);
+  const { calendar, loading: calLoading, isOwner, canEdit } = useCalendar(calendarId);
   const [event, setEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [fileRefreshKey, setFileRefreshKey] = useState(0);
+  const [recurrenceTotal, setRecurrenceTotal] = useState<number | null>(null);
   const t = useTranslations('event');
   const tFiles = useTranslations('files');
   const tCommon = useTranslations('common');
@@ -61,6 +63,14 @@ function EventDetailContent() {
     }
     fetch();
   }, [calendarId, eventId]);
+
+  // Fetch recurrence group size when the event belongs to one
+  useEffect(() => {
+    if (!event?.recurrenceGroupId) return;
+    getRecurrenceGroupEvents(calendarId, event.recurrenceGroupId).then((events) => {
+      setRecurrenceTotal(events.length);
+    });
+  }, [calendarId, event?.recurrenceGroupId]);
 
   const handleCancel = async (reason: string) => {
     try {
@@ -123,6 +133,12 @@ function EventDetailContent() {
                     {t('status.cancelled')}
                   </Badge>
                 )}
+                {event.recurrenceGroupId && recurrenceTotal !== null && event.recurrenceIndex !== null && (
+                  <Badge variant="secondary" className="text-sm">
+                    <Repeat className="mr-1 h-3 w-3" />
+                    {t('recurringBadge')} — {t('recurringOccurrence', { index: (event.recurrenceIndex ?? 0) + 1, total: recurrenceTotal })}
+                  </Badge>
+                )}
               </div>
               {event.description && (
                 <p className="text-muted-foreground">{event.description}</p>
@@ -135,7 +151,7 @@ function EventDetailContent() {
             </div>
             <div className="flex items-center gap-2 ml-4">
               <ExportButton event={event} />
-              {isOwner && !isCancelled && (
+              {canEdit && !isCancelled && (
                 <>
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/${locale}/calendar/${calendarId}/event/${eventId}/edit`}>
@@ -194,7 +210,7 @@ function EventDetailContent() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {isOwner && (
+              {canEdit && (
                 <FileUploader
                   calendarId={calendarId}
                   eventId={eventId}
@@ -204,7 +220,7 @@ function EventDetailContent() {
               <FileList
                 calendarId={calendarId}
                 eventId={eventId}
-                isOwner={isOwner}
+                isOwner={canEdit}
                 refreshKey={fileRefreshKey}
               />
             </CardContent>
@@ -214,7 +230,7 @@ function EventDetailContent() {
           <ChatThread
             calendarId={calendarId}
             eventId={eventId}
-            isOwner={isOwner}
+            isOwner={canEdit}
           />
         </div>
 

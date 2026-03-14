@@ -19,7 +19,7 @@ function NewEventContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const calendarId = params.calendarId as string;
-  const { calendar, loading, isOwner } = useCalendar(calendarId);
+  const { calendar, loading, canEdit } = useCalendar(calendarId);
   const t = useTranslations('event');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -36,7 +36,7 @@ function NewEventContent() {
     );
   }
 
-  if (!calendar || !isOwner) {
+  if (!calendar || !canEdit) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-xl font-semibold mb-2">{t('accessDenied')}</h2>

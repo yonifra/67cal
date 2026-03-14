@@ -6,7 +6,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Calendar } from '@/types';
-import { getCalendarByInviteCode, addMember } from '@/lib/firestore/calendars';
+import { getCalendarByInviteCode, getCalendarByCollaboratorInviteCode, addMember, addCollaborator } from '@/lib/firestore/calendars';
+import { getUserProfile } from '@/lib/firestore/users';
 import { useAuth } from '@/hooks/useAuth';
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '@/lib/firebase';
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lock, AlertCircle } from 'lucide-react';
+import { Loader2, Lock, AlertCircle, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -30,6 +31,8 @@ export default function InvitePage() {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [isCollaboratorInvite, setIsCollaboratorInvite] = useState(false);
+  const [collaboratorError, setCollaboratorError] = useState<string | null>(null);
   const inviteCode = params.inviteCode as string;
   const t = useTranslations('invite');
   const tAuth = useTranslations('auth');
@@ -47,11 +50,20 @@ export default function InvitePage() {
   useEffect(() => {
     async function fetchCalendar() {
       try {
-        const cal = await getCalendarByInviteCode(inviteCode);
+        // First try pupil invite code
+        let cal = await getCalendarByInviteCode(inviteCode);
         if (cal) {
           setCalendar(cal);
+          setIsCollaboratorInvite(false);
         } else {
-          setNotFound(true);
+          // Try collaborator invite code
+          cal = await getCalendarByCollaboratorInviteCode(inviteCode);
+          if (cal) {
+            setCalendar(cal);
+            setIsCollaboratorInvite(true);
+          } else {
+            setNotFound(true);
+          }
         }
       } catch (error) {
         console.error('Error fetching calendar:', error);
@@ -69,6 +81,35 @@ export default function InvitePage() {
     }
   }, [user, authLoading, router, locale]);
 
+  // Validate collaborator eligibility
+  useEffect(() => {
+    async function validateCollaborator() {
+      if (!isCollaboratorInvite || !user || !calendar) return;
+
+      // Check if user is already the owner
+      if (calendar.ownerId === user.uid) {
+        setCollaboratorError('alreadyOwner');
+        return;
+      }
+
+      // Check if user is already a collaborator
+      if ((calendar.collaborators ?? []).includes(user.uid)) {
+        setCollaboratorError('alreadyCollaborator');
+        return;
+      }
+
+      // Check if user is a teacher
+      const profile = await getUserProfile(user.uid);
+      if (!profile || profile.role !== 'teacher') {
+        setCollaboratorError('teacherOnlyError');
+        return;
+      }
+
+      setCollaboratorError(null);
+    }
+    validateCollaborator();
+  }, [isCollaboratorInvite, user, calendar]);
+
   const handleJoinWithoutPassword = async () => {
     if (!user || !calendar) return;
     setJoining(true);
@@ -80,6 +121,20 @@ export default function InvitePage() {
       }
       await addMember(calendar.id, user.uid);
       toast.success(t('joinSuccess'));
+      router.push(`/${locale}/calendar/${calendar.id}`);
+    } catch (error: any) {
+      toast.error(error.message || t('joinFailed'));
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  const handleJoinAsCollaborator = async () => {
+    if (!user || !calendar) return;
+    setJoining(true);
+    try {
+      await addCollaborator(calendar.id, user.uid);
+      toast.success(t('collaboratorJoinSuccess'));
       router.push(`/${locale}/calendar/${calendar.id}`);
     } catch (error: any) {
       toast.error(error.message || t('joinFailed'));
@@ -111,9 +166,9 @@ export default function InvitePage() {
     }
   };
 
-  // Auto-join if no password required
+  // Auto-join if no password required (pupil invite only)
   useEffect(() => {
-    if (calendar && user && !calendar.passwordHash && !joining) {
+    if (calendar && user && !isCollaboratorInvite && !calendar.passwordHash && !joining) {
       handleJoinWithoutPassword();
     }
   }, [calendar, user]);
@@ -143,6 +198,45 @@ export default function InvitePage() {
             <Button asChild>
               <Link href={`/${locale}/dashboard`}>{tCommon('goToDashboard')}</Link>
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Collaborator invite flow
+  if (isCollaboratorInvite && calendar) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10">
+              <Users className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle>{t('collaboratorInviteTitle')}</CardTitle>
+            <CardDescription>
+              {t('collaboratorInviteDesc')} <strong>{calendar.title}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {collaboratorError ? (
+              <div className="rounded-sm bg-destructive/10 p-4 text-center">
+                <AlertCircle className="mx-auto mb-2 h-6 w-6 text-destructive" />
+                <p className="text-sm text-destructive">{t(collaboratorError)}</p>
+                <Button asChild className="mt-4">
+                  <Link href={`/${locale}/dashboard`}>{tCommon('goToDashboard')}</Link>
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={handleJoinAsCollaborator}
+                disabled={joining}
+              >
+                {joining && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {t('joinAsCollaborator')}
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>

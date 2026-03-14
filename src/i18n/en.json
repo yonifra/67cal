@@ -116,6 +116,9 @@
     "createdOn": "Created {date}",
     "ownedTab": "My Calendars",
     "joinedTab": "Joined",
+    "collaboratingTab": "Collaborating",
+    "noCollaboratingCalendars": "No collaborating calendars yet",
+    "noCollaboratingCalendarsDesc": "When a teacher shares a collaborator invite link with you, their calendar will appear here.",
     "noJoinedCalendars": "No calendars joined yet",
     "noJoinedCalendarsDesc": "Ask your teacher for an invite link to join a calendar.",
     "loadFailed": "Failed to load calendars",
@@ -186,7 +189,22 @@
     "calendarUpdated": "Calendar updated successfully!",
     "calendarDeleted": "Calendar deleted",
     "loadFailed": "Failed to load calendar",
-    "notFoundOrDenied": "Calendar not found or access denied"
+    "notFoundOrDenied": "Calendar not found or access denied",
+    "collaborators": "Collaborators",
+    "collaboratorsDesc": "Invite other teachers to help manage this calendar.",
+    "collaboratorInviteLink": "Collaborator Invite Link",
+    "collaboratorInviteLinkDesc": "Share this link with other teachers to invite them as collaborators",
+    "regenerateCode": "Regenerate Link",
+    "regenerateConfirm": "Are you sure you want to regenerate the collaborator invite link? The old link will stop working.",
+    "codeRegenerated": "Collaborator invite link regenerated",
+    "removeCollaborator": "Remove Collaborator",
+    "removeCollaboratorConfirm": "Are you sure you want to remove {name} as a collaborator? They will lose editing access.",
+    "collaboratorRemoved": "Collaborator removed",
+    "collaboratorRemoveFailed": "Failed to remove collaborator",
+    "noCollaborators": "No collaborators yet",
+    "noCollaboratorsDesc": "Share the invite link with other teachers.",
+    "viewOnlyNotice": "You have view-only access as a collaborator.",
+    "collaboratorBadge": "Collaborator"
   },
   "event": {
     "create": "Create Event",
@@ -232,8 +250,17 @@
     "accessDeniedDesc": "Only the calendar owner can create events.",
     "errors": {
       "endBeforeStart": "End time must be after start time",
-      "invalidLink": "Please enter a valid URL"
-    }
+      "invalidLink": "Please enter a valid URL",
+      "repeatUntilRequired": "Please set an end date for recurring events",
+      "repeatUntilBeforeStart": "Repeat-until date must be after the start date"
+    },
+    "recurrence": "Repeat",
+    "recurrenceNone": "Does not repeat",
+    "recurrenceWeekly": "Weekly",
+    "repeatUntil": "Repeat until",
+    "repeatUntilHint": "Event will repeat every week until this date",
+    "recurringBadge": "Recurring event",
+    "recurringOccurrence": "Occurrence {index} of {total}"
   },
   "chat": {
     "title": "Chat",
@@ -292,7 +319,14 @@
     "invalidPassword": "Incorrect password. Please try again.",
     "alreadyMember": "You are already a member of this calendar!",
     "notFound": "Calendar Not Found",
-    "notFoundDesc": "This invite link may be invalid or expired."
+    "notFoundDesc": "This invite link may be invalid or expired.",
+    "collaboratorInviteTitle": "Collaborator Invite",
+    "collaboratorInviteDesc": "You've been invited to collaborate on",
+    "joinAsCollaborator": "Join as Collaborator",
+    "teacherOnlyError": "Only teacher accounts can become collaborators.",
+    "alreadyCollaborator": "You are already a collaborator on this calendar!",
+    "alreadyOwner": "You are the owner of this calendar.",
+    "collaboratorJoinSuccess": "You've joined as a collaborator!"
   },
   "errors": {
     "notFound": "Page Not Found",

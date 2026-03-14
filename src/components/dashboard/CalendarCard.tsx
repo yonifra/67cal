@@ -14,6 +14,7 @@ import { useLocale } from 'next-intl';
 interface CalendarCardProps {
   calendar: Calendar;
   isOwner: boolean;
+  isCollaborator?: boolean;
   onDelete?: () => void;
 }
 
@@ -24,14 +25,17 @@ const themeColors: Record<string, string> = {
   minimal: 'bg-gray-500 text-white border-gray-500',
 };
 
-export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps) {
+export function CalendarCard({ calendar, isOwner, isCollaborator = false, onDelete }: CalendarCardProps) {
   const td = useTranslations('dashboard');
   const tn = useTranslations('nav');
+  const tc = useTranslations('calendar');
   const locale = useLocale();
 
   const createdDate = calendar.createdAt?.toDate
     ? format(calendar.createdAt.toDate(), 'MMM d, yyyy')
     : '';
+
+  const showFooter = isOwner || isCollaborator;
 
   return (
     <Card className="group hover:border-primary/40 hover:shadow-md transition-all duration-200">
@@ -48,9 +52,16 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
               </Link>
             </CardTitle>
           </div>
-          <Badge variant="outline" className={themeColors[calendar.theme] || ''}>
-            {calendar.theme}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            {isCollaborator && (
+              <Badge variant="secondary" className="text-xs">
+                {tc('collaboratorBadge')}
+              </Badge>
+            )}
+            <Badge variant="outline" className={themeColors[calendar.theme] || ''}>
+              {calendar.theme}
+            </Badge>
+          </div>
         </div>
         {calendar.description && (
           <CardDescription className="line-clamp-2">
@@ -67,16 +78,18 @@ export function CalendarCard({ calendar, isOwner, onDelete }: CalendarCardProps)
           {createdDate && <span>{td('createdOn', { date: createdDate })}</span>}
         </div>
       </CardContent>
-      {isOwner && (
+      {showFooter && (
         <CardFooter className="flex items-center gap-2">
-          <InviteModal inviteCode={calendar.inviteCode} calendarTitle={calendar.title} />
+          {isOwner && (
+            <InviteModal inviteCode={calendar.inviteCode} calendarTitle={calendar.title} />
+          )}
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/${locale}/calendar/${calendar.id}/settings`}>
               <Settings className="mr-1 h-3.5 w-3.5" />
               {tn('settings')}
             </Link>
           </Button>
-          {onDelete && (
+          {isOwner && onDelete && (
             <Button
               variant="ghost"
               size="sm"

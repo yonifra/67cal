@@ -12,6 +12,13 @@ service cloud.firestore {
     function calendarMembers(calId) {
       return get(/databases/$(database)/documents/calendars/$(calId)).data.members;
     }
+    function calendarCollaborators(calId) {
+      return get(/databases/$(database)/documents/calendars/$(calId)).data.collaborators;
+    }
+    function canEditCalendar(calId) {
+      return calendarOwner(calId) == request.auth.uid
+          || request.auth.uid in calendarCollaborators(calId);
+    }
 
     match /users/{userId} {
       allow read: if isAuth();
@@ -22,20 +29,29 @@ service cloud.firestore {
 
     match /calendars/{calId} {
       // Use resource.data (not get()) so collection queries work.
-      // Three query patterns are used by the app:
-      //   1. where('ownerId', '==', uid)             → owner dashboard
-      //   2. where('members', 'array-contains', uid)  → joined calendars
-      //   3. where('inviteCode', '==', code)          → invite join flow
-      // Direct getDoc by ID also works (owner/member accessing their calendar).
-      // The inviteCode condition is acceptable because having the invite code
-      // is the intended access mechanism, and sensitive data lives in subcollections.
+      // Query patterns used by the app:
+      //   1. where('ownerId', '==', uid)                        → owner dashboard
+      //   2. where('members', 'array-contains', uid)            → joined calendars
+      //   3. where('collaborators', 'array-contains', uid)      → collaborating calendars
+      //   4. where('inviteCode', '==', code)                    → pupil invite join flow
+      //   5. where('collaboratorInviteCode', '==', code)        → collaborator invite join flow
       allow read: if isAuth()
         && (resource.data.ownerId == request.auth.uid
             || request.auth.uid in resource.data.members
-            || resource.data.inviteCode is string);
+            || resource.data.inviteCode is string
+            || resource.data.collaboratorInviteCode is string);
       allow create: if isAuth();
+      // Owner can update anything; collaborators can update but NOT touch
+      // ownerId, collaborators, collaboratorInviteCode, inviteCode, members, passwordHash
       allow update: if isAuth()
-        && resource.data.ownerId == request.auth.uid;
+        && (resource.data.ownerId == request.auth.uid
+            || (request.auth.uid in resource.data.collaborators
+                && request.resource.data.ownerId == resource.data.ownerId
+                && request.resource.data.collaborators == resource.data.collaborators
+                && request.resource.data.collaboratorInviteCode == resource.data.collaboratorInviteCode
+                && request.resource.data.inviteCode == resource.data.inviteCode
+                && request.resource.data.members == resource.data.members
+                && request.resource.data.passwordHash == resource.data.passwordHash));
       allow delete: if isAuth()
         && resource.data.ownerId == request.auth.uid;
 
@@ -44,7 +60,7 @@ service cloud.firestore {
           && (calendarOwner(calId) == request.auth.uid
               || request.auth.uid in calendarMembers(calId));
         allow write: if isAuth()
-          && calendarOwner(calId) == request.auth.uid;
+          && canEditCalendar(calId);
 
         match /messages/{msgId} {
           allow read: if isAuth()
@@ -54,7 +70,8 @@ service cloud.firestore {
             && (calendarOwner(calId) == request.auth.uid
                 || request.auth.uid in calendarMembers(calId));
           allow update, delete: if isAuth()
-            && request.auth.uid == resource.data.authorId;
+            && (request.auth.uid == resource.data.authorId
+                || canEditCalendar(calId));
         }
 
         match /files/{fileId} {
@@ -62,7 +79,7 @@ service cloud.firestore {
             && (calendarOwner(calId) == request.auth.uid
                 || request.auth.uid in calendarMembers(calId));
           allow write: if isAuth()
-            && calendarOwner(calId) == request.auth.uid;
+            && canEditCalendar(calId);
         }
       }
     }

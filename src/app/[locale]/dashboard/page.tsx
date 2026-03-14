@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Calendar } from '@/types';
-import { getOwnedCalendars, getMemberCalendars, deleteCalendar } from '@/lib/firestore/calendars';
+import { getOwnedCalendars, getMemberCalendars, getCollaboratorCalendars, deleteCalendar } from '@/lib/firestore/calendars';
 import { useAuthStore } from '@/stores/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthGuard } from '@/components/auth/AuthGuard';
@@ -19,6 +19,7 @@ import { useLocale } from 'next-intl';
 function DashboardContent() {
   const [ownedCalendars, setOwnedCalendars] = useState<Calendar[]>([]);
   const [memberCalendars, setMemberCalendars] = useState<Calendar[]>([]);
+  const [collaboratingCalendars, setCollaboratingCalendars] = useState<Calendar[]>([]);
   const [loading, setLoading] = useState(true);
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
@@ -32,13 +33,21 @@ function DashboardContent() {
     if (!user) return;
     try {
       setLoading(true);
-      const [owned, member] = await Promise.all([
+      const [owned, member, collaborating] = await Promise.all([
         isTeacher ? getOwnedCalendars(user.uid) : Promise.resolve([]),
         getMemberCalendars(user.uid),
+        isTeacher ? getCollaboratorCalendars(user.uid) : Promise.resolve([]),
       ]);
       setOwnedCalendars(owned);
-      // Filter out calendars that user owns from member list
-      setMemberCalendars(member.filter((c) => c.ownerId !== user.uid));
+
+      // Get collaborator IDs to filter them out of joined tab
+      const collaboratorIds = new Set(collaborating.map((c) => c.id));
+
+      // Filter out calendars that user owns or is a collaborator on from member list
+      setMemberCalendars(
+        member.filter((c) => c.ownerId !== user.uid && !collaboratorIds.has(c.id))
+      );
+      setCollaboratingCalendars(collaborating);
     } catch (error) {
       console.error('Error fetching calendars:', error);
       toast.error(t('loadFailed'));
@@ -95,6 +104,9 @@ function DashboardContent() {
             <TabsTrigger value="owned">
               {t('ownedTab')} ({ownedCalendars.length})
             </TabsTrigger>
+            <TabsTrigger value="collaborating">
+              {t('collaboratingTab')} ({collaboratingCalendars.length})
+            </TabsTrigger>
             <TabsTrigger value="joined">
               {t('joinedTab')} ({memberCalendars.length})
             </TabsTrigger>
@@ -111,6 +123,28 @@ function DashboardContent() {
                     calendar={cal}
                     isOwner
                     onDelete={() => handleDelete(cal.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="collaborating">
+            {collaboratingCalendars.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <p className="text-muted-foreground">{t('noCollaboratingCalendars')}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {t('noCollaboratingCalendarsDesc')}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {collaboratingCalendars.map((cal) => (
+                  <CalendarCard
+                    key={cal.id}
+                    calendar={cal}
+                    isOwner={false}
+                    isCollaborator
                   />
                 ))}
               </div>

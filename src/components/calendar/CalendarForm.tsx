@@ -40,9 +40,10 @@ interface CalendarFormProps {
   initialData?: Partial<CalendarFormData>;
   onSubmit: (data: CalendarFormData) => Promise<void>;
   isEditing?: boolean;
+  disabled?: boolean;
 }
 
-export function CalendarForm({ initialData, onSubmit, isEditing }: CalendarFormProps) {
+export function CalendarForm({ initialData, onSubmit, isEditing, disabled }: CalendarFormProps) {
   const t = useTranslations('calendar');
   const tc = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
@@ -112,6 +113,7 @@ export function CalendarForm({ initialData, onSubmit, isEditing }: CalendarFormP
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+          <fieldset disabled={disabled} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">{t('title')}</Label>
             <Input
@@ -267,11 +269,12 @@ export function CalendarForm({ initialData, onSubmit, isEditing }: CalendarFormP
           </div>
 
           <div className="flex gap-3 justify-end">
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading || disabled}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isEditing ? tc('saveChanges') : t('create')}
             </Button>
           </div>
+          </fieldset>
         </form>
       </CardContent>
     </Card>

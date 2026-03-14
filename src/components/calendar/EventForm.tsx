@@ -11,7 +11,14 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Video } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Loader2, Video, Repeat } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -25,6 +32,7 @@ function createEventSchema(t: (key: string) => string) {
       startTime: z.string().min(1, t('startTimeRequired')),
       endTime: z.string().min(1, t('endTimeRequired')),
       meetingLink: z.string(),
+      repeatUntil: z.string(),
     })
     .refine(
       (data) => {
@@ -34,6 +42,16 @@ function createEventSchema(t: (key: string) => string) {
         return true;
       },
       { message: t('errors.endBeforeStart'), path: ['endTime'] }
+    )
+    .refine(
+      (data) => {
+        // Only validate repeatUntil if it's set (i.e. user chose weekly recurrence)
+        if (data.repeatUntil && data.startTime) {
+          return new Date(data.repeatUntil) > new Date(data.startTime);
+        }
+        return true;
+      },
+      { message: t('errors.repeatUntilBeforeStart'), path: ['repeatUntil'] }
     );
 }
 
@@ -41,12 +59,14 @@ interface EventFormProps {
   initialData?: Partial<EventFormData>;
   onSubmit: (data: EventFormData) => Promise<void>;
   isEditing?: boolean;
+  isRecurringEvent?: boolean;
 }
 
-export function EventForm({ initialData, onSubmit, isEditing }: EventFormProps) {
+export function EventForm({ initialData, onSubmit, isEditing, isRecurringEvent }: EventFormProps) {
   const t = useTranslations('event');
   const tc = useTranslations('common');
   const [isLoading, setIsLoading] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<'none' | 'weekly'>('none');
 
   const eventSchema = createEventSchema(t);
 
@@ -54,6 +74,7 @@ export function EventForm({ initialData, onSubmit, isEditing }: EventFormProps) 
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(eventSchema),
@@ -63,13 +84,26 @@ export function EventForm({ initialData, onSubmit, isEditing }: EventFormProps) 
       startTime: initialData?.startTime || '',
       endTime: initialData?.endTime || '',
       meetingLink: initialData?.meetingLink || '',
+      repeatUntil: initialData?.repeatUntil || '',
     },
   });
 
   const meetingLink = watch('meetingLink');
   const detectedProvider = meetingLink ? detectMeetingProvider(meetingLink) : null;
 
+  const handleRecurrenceChange = (value: string) => {
+    setRecurrenceType(value as 'none' | 'weekly');
+    if (value === 'none') {
+      setValue('repeatUntil', '');
+    }
+  };
+
   const handleFormSubmit = async (data: FormValues) => {
+    // If recurrence is "weekly" but repeatUntil is empty, show validation
+    if (recurrenceType === 'weekly' && !data.repeatUntil) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       await onSubmit(data as EventFormData);
@@ -159,6 +193,48 @@ export function EventForm({ initialData, onSubmit, isEditing }: EventFormProps) 
               <p className="text-sm text-destructive">{errors.meetingLink.message}</p>
             )}
           </div>
+
+          {/* Recurrence section — hidden when editing an existing recurring event */}
+          {!isEditing && !isRecurringEvent && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="recurrence">
+                  <span className="flex items-center gap-1.5">
+                    <Repeat className="h-4 w-4" />
+                    {t('recurrence')}
+                  </span>
+                </Label>
+                <Select value={recurrenceType} onValueChange={handleRecurrenceChange}>
+                  <SelectTrigger id="recurrence" aria-label={t('recurrence')}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t('recurrenceNone')}</SelectItem>
+                    <SelectItem value="weekly">{t('recurrenceWeekly')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {recurrenceType === 'weekly' && (
+                <div className="space-y-2">
+                  <Label htmlFor="repeatUntil">{t('repeatUntil')}</Label>
+                  <Input
+                    id="repeatUntil"
+                    type="date"
+                    {...register('repeatUntil')}
+                    aria-label={t('repeatUntil')}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('repeatUntilHint')}</p>
+                  {recurrenceType === 'weekly' && !watch('repeatUntil') && (
+                    <p className="text-sm text-destructive">{t('errors.repeatUntilRequired')}</p>
+                  )}
+                  {errors.repeatUntil && (
+                    <p className="text-sm text-destructive">{errors.repeatUntil.message}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-3 justify-end">
             <Button type="submit" disabled={isLoading}>

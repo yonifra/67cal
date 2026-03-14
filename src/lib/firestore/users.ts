@@ -37,3 +37,15 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 export async function updateUserRole(uid: string, role: UserRole): Promise<void> {
   await updateDoc(doc(db, 'users', uid), { role });
 }
+
+export async function getUserProfiles(uids: string[]): Promise<UserProfile[]> {
+  if (uids.length === 0) return [];
+  const profiles: UserProfile[] = [];
+  for (const uid of uids) {
+    const docSnap = await getDoc(doc(db, 'users', uid));
+    if (docSnap.exists()) {
+      profiles.push(docSnap.data() as UserProfile);
+    }
+  }
+  return profiles;
+}

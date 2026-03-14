@@ -18,7 +18,7 @@ function CalendarContent() {
   const params = useParams();
   const router = useRouter();
   const calendarId = params.calendarId as string;
-  const { calendar, loading, isOwner } = useCalendar(calendarId);
+  const { calendar, loading, isOwner, canEdit } = useCalendar(calendarId);
   const { events, loading: eventsLoading } = useEvents(calendarId);
   const t = useTranslations('calendar');
   const tCommon = useTranslations('common');
@@ -65,11 +65,13 @@ function CalendarContent() {
           </div>
           <div className="flex items-center gap-2">
             {isOwner && (
+              <InviteModal
+                inviteCode={calendar.inviteCode}
+                calendarTitle={calendar.title}
+              />
+            )}
+            {canEdit && (
               <>
-                <InviteModal
-                  inviteCode={calendar.inviteCode}
-                  calendarTitle={calendar.title}
-                />
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/${locale}/calendar/${calendarId}/settings`}>
                     <Settings className="mr-2 h-4 w-4" />
@@ -98,7 +100,7 @@ function CalendarContent() {
             locale={calendar.language}
             firstDay={calendar.firstDay ?? 0}
             weekendDays={calendar.weekendDays || 'sat-sun'}
-            isOwner={isOwner}
+            isOwner={canEdit}
           />
         )}
       </div>

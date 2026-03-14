@@ -12,8 +12,10 @@ export function useCalendar(calendarId: string) {
   const user = useAuthStore((s) => s.user);
 
   const isOwner = calendar?.ownerId === user?.uid;
+  const isCollaborator = user?.uid ? (calendar?.collaborators ?? []).includes(user.uid) : false;
+  const canEdit = isOwner || isCollaborator;
   const isMember = user?.uid ? calendar?.members?.includes(user.uid) ?? false : false;
-  const role = isOwner ? 'teacher' as const : 'pupil' as const;
+  const role = isOwner || isCollaborator ? 'teacher' as const : 'pupil' as const;
 
   useEffect(() => {
     async function fetchCalendar() {
@@ -30,5 +32,5 @@ export function useCalendar(calendarId: string) {
     if (calendarId) fetchCalendar();
   }, [calendarId]);
 
-  return { calendar, loading, error, isOwner, isMember, role };
+  return { calendar, loading, error, isOwner, isCollaborator, canEdit, isMember, role };
 }

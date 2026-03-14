@@ -21,7 +21,7 @@ function EditEventContent() {
   const router = useRouter();
   const calendarId = params.calendarId as string;
   const eventId = params.eventId as string;
-  const { calendar, loading: calLoading, isOwner } = useCalendar(calendarId);
+  const { calendar, loading: calLoading, canEdit } = useCalendar(calendarId);
   const [event, setEvent] = useState<CalendarEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const t = useTranslations('event');
@@ -50,7 +50,7 @@ function EditEventContent() {
     );
   }
 
-  if (!event || !isOwner) {
+  if (!event || !canEdit) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-xl font-semibold mb-2">{t('notFound')}</h2>
@@ -93,9 +93,11 @@ function EditEventContent() {
           startTime,
           endTime,
           meetingLink: event.meetingLink,
+          repeatUntil: '',
         }}
         onSubmit={handleSubmit}
         isEditing
+        isRecurringEvent={!!event.recurrenceGroupId}
       />
     </div>
   );

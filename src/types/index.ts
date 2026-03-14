@@ -31,6 +31,8 @@ export interface Calendar {
   weekendDays: WeekendDays;
   passwordHash: string | null;
   inviteCode: string;
+  collaborators: string[];
+  collaboratorInviteCode: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   members: string[];
@@ -46,6 +48,8 @@ export interface CalendarEvent {
   meetingProvider: MeetingProvider;
   status: EventStatus;
   cancelReason: string | null;
+  recurrenceGroupId: string | null;
+  recurrenceIndex: number | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -87,4 +91,5 @@ export interface EventFormData {
   startTime: string;
   endTime: string;
   meetingLink: string;
+  repeatUntil: string;
 }

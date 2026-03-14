@@ -50,6 +50,7 @@ export function WeekView({
       status: event.status,
       meetingProvider: event.meetingProvider,
       cancelReason: event.cancelReason,
+      isRecurring: !!(event.recurrenceGroupId),
     },
   }));
 
