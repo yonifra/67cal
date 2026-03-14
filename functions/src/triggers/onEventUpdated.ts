@@ -1,7 +1,5 @@
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
-import { sendEmails, EmailPayload } from '../services/emailService';
-import { buildTimeChangedEmail, buildCancelledEmail } from '../templates/eventNotificationEmail';
 
 const db = admin.firestore();
 
@@ -25,7 +23,7 @@ export const onEventUpdated = onDocumentUpdated(
 
     if (!timeChanged && !cancelled) return;
 
-    // Get calendar doc for members list, title, and language
+    // Get calendar doc for members list and title
     const calDoc = await db.collection('calendars').doc(calendarId).get();
     if (!calDoc.exists) {
       console.error(`Calendar ${calendarId} not found`);
@@ -33,7 +31,6 @@ export const onEventUpdated = onDocumentUpdated(
     }
     const calData = calDoc.data()!;
     const calendarTitle: string = calData.title || '';
-    const calendarLanguage: string = calData.language || 'en';
     const members: string[] = calData.members || [];
 
     // Determine who made the change
@@ -54,10 +51,10 @@ export const onEventUpdated = onDocumentUpdated(
 
     const eventTitle: string = after.title || 'Untitled Event';
 
-    // Determine notification type and build context
+    // Determine notification type
     const notificationType = cancelled ? 'event_cancelled' : 'event_time_changed';
 
-    // Batch-create notification documents
+    // Batch-create in-app notification documents
     const batch = db.batch();
     for (const recipientId of recipientIds) {
       const notifRef = db.collection('notifications').doc();
@@ -90,64 +87,9 @@ export const onEventUpdated = onDocumentUpdated(
     }
     await batch.commit();
 
-    // Get recipient emails for email notifications
-    const recipientDocs = await Promise.all(
-      recipientIds.map((uid: string) => db.collection('users').doc(uid).get())
-    );
-
-    const emailPayloads: EmailPayload[] = [];
-
-    for (const recipientDoc of recipientDocs) {
-      if (!recipientDoc.exists) continue;
-      const recipientData = recipientDoc.data()!;
-      const email = recipientData.email;
-      if (!email) continue;
-
-      let emailContent: { subject: string; html: string };
-
-      if (cancelled) {
-        emailContent = buildCancelledEmail(
-          {
-            eventTitle,
-            calendarTitle,
-            actorName,
-            cancelReason: after.cancelReason || undefined,
-            calendarId,
-            eventId,
-          },
-          calendarLanguage
-        );
-      } else {
-        emailContent = buildTimeChangedEmail(
-          {
-            eventTitle,
-            calendarTitle,
-            actorName,
-            previousStart: before.startTime.toDate(),
-            newStart: after.startTime.toDate(),
-            previousEnd: before.endTime.toDate(),
-            newEnd: after.endTime.toDate(),
-            calendarId,
-            eventId,
-          },
-          calendarLanguage
-        );
-      }
-
-      emailPayloads.push({
-        to: email,
-        subject: emailContent.subject,
-        html: emailContent.html,
-      });
-    }
-
-    if (emailPayloads.length > 0) {
-      await sendEmails(emailPayloads);
-    }
-
     console.log(
       `Notification: ${notificationType} for event ${eventId} — ` +
-      `${recipientIds.length} notification(s) created, ${emailPayloads.length} email(s) sent`
+      `${recipientIds.length} notification(s) created`
     );
   }
 );
