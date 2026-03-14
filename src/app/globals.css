@@ -223,71 +223,298 @@
 /* FullCalendar theme integration — inherit from CSS custom properties */
 .fc {
   --fc-border-color: var(--border);
-  --fc-button-bg-color: var(--primary);
-  --fc-button-border-color: var(--primary);
-  --fc-button-text-color: var(--primary-foreground);
-  --fc-button-hover-bg-color: var(--primary);
-  --fc-button-hover-border-color: var(--primary);
+  --fc-button-bg-color: transparent;
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--foreground);
+  --fc-button-hover-bg-color: var(--muted);
+  --fc-button-hover-border-color: var(--border);
   --fc-button-active-bg-color: var(--primary);
   --fc-button-active-border-color: var(--primary);
-  --fc-today-bg-color: var(--accent);
+  --fc-today-bg-color: color-mix(in oklch, var(--primary) 6%, var(--card));
   --fc-neutral-bg-color: var(--muted);
   --fc-page-bg-color: var(--card);
   --fc-event-bg-color: var(--primary);
-  --fc-event-border-color: var(--primary);
+  --fc-event-border-color: transparent;
   --fc-event-text-color: var(--primary-foreground);
 }
 
-.fc .fc-col-header-cell {
-  background-color: var(--muted);
-  color: var(--foreground);
-}
-
-.fc .fc-col-header-cell-cushion {
-  color: var(--foreground);
-  font-weight: 600;
-}
-
-.fc .fc-timegrid-slot-label-cushion,
-.fc .fc-timegrid-axis-cushion {
-  color: var(--muted-foreground);
+/* ── Toolbar: segmented control look ── */
+.fc .fc-toolbar {
+  padding-bottom: 1rem;
+  margin-bottom: 0.5rem !important;
+  border-bottom: 1px solid var(--border);
+  gap: 0.75rem;
 }
 
 .fc .fc-toolbar-title {
   color: var(--foreground);
-}
-
-.fc .fc-daygrid-day-number {
-  color: var(--foreground);
-}
-
-.fc .fc-scrollgrid {
-  border-color: var(--border);
-}
-
-.fc td,
-.fc th {
-  border-color: var(--border);
-}
-
-.fc .fc-timegrid-slot {
-  border-color: var(--border);
-}
-
-.fc .fc-timegrid-col {
-  background-color: var(--card);
-}
-
-.fc .fc-day-today {
-  background-color: var(--accent) !important;
+  font-family: var(--font-heading), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
 }
 
 .fc .fc-button {
   border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  padding: 0.375rem 0.75rem;
+  transition: all 150ms ease;
+  box-shadow: none !important;
+  text-transform: capitalize;
+}
+
+.fc .fc-button:not(.fc-button-active):not(:disabled) {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.fc .fc-button:not(.fc-button-active):hover {
+  background-color: var(--muted);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.fc .fc-button-active,
+.fc .fc-button:active {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  font-weight: 600;
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--primary) 30%, transparent) !important;
 }
 
 .fc .fc-button:focus {
-  box-shadow: 0 0 0 2px var(--ring);
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring) !important;
+}
+
+/* Button group: segmented control */
+.fc .fc-button-group {
+  border-radius: var(--radius);
+  overflow: hidden;
+  background-color: var(--muted);
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--border);
+}
+
+.fc .fc-button-group .fc-button {
+  border: none;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.fc .fc-button-group .fc-button:not(.fc-button-active) {
+  background-color: transparent;
+}
+
+.fc .fc-button-group .fc-button-active {
+  background-color: var(--background) !important;
+  border-color: transparent !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  font-weight: 600;
+}
+
+/* Today button: pill style */
+.fc .fc-today-button {
+  border-radius: 9999px;
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* ── Column headers ── */
+.fc .fc-col-header-cell {
+  background-color: var(--muted);
+  color: var(--foreground);
+  border-bottom: 2px solid var(--border);
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.625rem 0.5rem;
+}
+
+/* Today column header: bold accent */
+.fc .fc-day-today .fc-col-header-cell-cushion,
+.fc .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.fc .fc-col-header-cell.fc-day-today {
+  background-color: color-mix(in oklch, var(--primary) 8%, var(--muted));
+  border-bottom: 3px solid var(--primary);
+}
+
+/* ── Time labels ── */
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion {
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* ── Grid lines: visual rhythm ── */
+.fc .fc-scrollgrid {
+  border-color: var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.fc td,
+.fc th {
+  border-color: color-mix(in oklch, var(--border) 60%, transparent);
+}
+
+/* Full-hour lines are stronger */
+.fc .fc-timegrid-slot.fc-timegrid-slot-lane[data-time$=":00:00"] {
+  border-top-color: var(--border);
+}
+
+.fc .fc-timegrid-slot {
+  border-color: color-mix(in oklch, var(--border) 40%, transparent);
+}
+
+.fc .fc-timegrid-col {
+  background-color: var(--card);
+  transition: background-color 200ms ease;
+}
+
+/* ── Today column ── */
+.fc .fc-day-today {
+  background-color: color-mix(in oklch, var(--primary) 4%, var(--card)) !important;
+}
+
+/* ── Now indicator: bold red line with dot ── */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: var(--destructive);
+  border-width: 2px;
+  z-index: 4;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+  border-color: var(--destructive);
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.fc .fc-timegrid-now-indicator-line::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--destructive);
+  border-radius: 50%;
+  box-shadow: 0 0 6px color-mix(in oklch, var(--destructive) 50%, transparent);
+}
+
+html[dir="rtl"] .fc .fc-timegrid-now-indicator-line::before {
+  left: auto;
+  right: -5px;
+}
+
+/* ── Events: gradient, depth, hover lift ── */
+.fc .fc-event {
+  cursor: pointer;
+  border: none;
+  border-left: 3px solid color-mix(in oklch, var(--primary) 100%, black 20%);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--primary), color-mix(in oklch, var(--primary) 82%, black));
+  box-shadow: 0 1px 3px color-mix(in oklch, var(--primary) 20%, transparent),
+              0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  overflow: hidden;
+}
+
+html[dir="rtl"] .fc .fc-event {
+  border-left: none;
+  border-right: 3px solid color-mix(in oklch, var(--primary) 100%, black 20%);
+}
+
+.fc .fc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px color-mix(in oklch, var(--primary) 30%, transparent),
+              0 2px 4px rgba(0, 0, 0, 0.1);
+  filter: brightness(1.08);
+}
+
+.fc .fc-event-main {
+  padding: 3px 6px;
+}
+
+.fc .fc-event-title {
+  font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+.fc .fc-event-time {
+  font-weight: 400;
+  font-size: 0.6875rem;
+  opacity: 0.85;
+}
+
+/* Cancelled events: muted with strikethrough pattern */
+.fc .fc-event.fc-event-cancelled {
+  background: var(--muted) !important;
+  border-left-color: var(--muted-foreground) !important;
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+html[dir="rtl"] .fc .fc-event.fc-event-cancelled {
+  border-right-color: var(--muted-foreground) !important;
+}
+
+.fc .fc-event.fc-event-cancelled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    color-mix(in oklch, var(--muted-foreground) 15%, transparent) 4px,
+    color-mix(in oklch, var(--muted-foreground) 15%, transparent) 5px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.fc .fc-event.fc-event-cancelled:hover {
+  transform: none;
+  filter: none;
+}
+
+/* ── Event content: meeting provider icon ── */
+.fc-event-provider-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  opacity: 0.85;
+  margin-top: 1px;
+}
+
+.fc-event-provider-icon svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+/* ── Slot hover highlight (for owners — drag-to-create hint) ── */
+.fc .fc-timegrid-col.fc-day:hover {
+  background-color: color-mix(in oklch, var(--primary) 3%, var(--card));
 }
 
 /* Selection styling for drag-to-create */
@@ -297,11 +524,34 @@
 
 .fc .fc-highlight {
   background-color: var(--primary);
-  opacity: 0.15;
+  opacity: 0.12;
+  border-radius: var(--radius);
 }
 
-.fc .fc-event {
-  cursor: pointer;
+/* ── View transition ── */
+.fc .fc-view {
+  animation: fc-fade-in 200ms ease-out;
+}
+
+@keyframes fc-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Calendar card wrapper ── */
+.fc-calendar-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 200ms ease;
+}
+
+.fc-calendar-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
 }
 
 /* ── Mobile optimizations for FullCalendar ── */
@@ -311,6 +561,7 @@
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 0.5rem !important;
+    padding-bottom: 0.75rem;
   }
 
   .fc .fc-toolbar-title {
@@ -336,6 +587,7 @@
   .fc .fc-col-header-cell-cushion {
     font-size: 0.75rem;
     padding: 4px 2px;
+    letter-spacing: 0.02em;
   }
 
   /* More visible events — slightly larger text, more padding */
@@ -367,5 +619,11 @@
   /* Wrapper padding reduction already handled by Tailwind p-2 */
   .fc-mobile-wrapper {
     overflow-x: hidden;
+  }
+
+  /* Disable hover lift on mobile (touch devices) */
+  .fc .fc-event:hover {
+    transform: none;
+    filter: none;
   }
 }

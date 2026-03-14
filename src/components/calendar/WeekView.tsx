@@ -19,6 +19,26 @@ interface WeekViewProps {
   isOwner?: boolean;
 }
 
+// SVG icons for meeting providers (inline to avoid extra imports)
+const providerIcons: Record<string, { icon: string; label: string }> = {
+  zoom: {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>',
+    label: 'Zoom',
+  },
+  meet: {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>',
+    label: 'Meet',
+  },
+  teams: {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+    label: 'Teams',
+  },
+  other: {
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    label: 'Link',
+  },
+};
+
 export function WeekView({
   calendarId,
   events,
@@ -57,10 +77,7 @@ export function WeekView({
   }, []);
 
   // Compute hidden days based on weekend configuration
-  // FullCalendar uses 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday
   const hiddenDays: number[] = [];
-  // We don't hide weekend days — we show all 7 days
-  // But we do configure which days count as weekends for styling
 
   const fcEvents = events.map((event) => ({
     id: event.id,
@@ -70,7 +87,9 @@ export function WeekView({
     backgroundColor: event.status === 'cancelled' ? 'hsl(var(--muted))' : undefined,
     borderColor: event.status === 'cancelled' ? 'hsl(var(--muted-foreground))' : undefined,
     textColor: event.status === 'cancelled' ? 'hsl(var(--muted-foreground))' : undefined,
-    classNames: event.status === 'cancelled' ? ['opacity-60', 'line-through'] : [],
+    classNames: event.status === 'cancelled'
+      ? ['fc-event-cancelled']
+      : [],
     extendedProps: {
       status: event.status,
       meetingProvider: event.meetingProvider,
@@ -79,17 +98,42 @@ export function WeekView({
     },
   }));
 
+  // Custom event rendering: show meeting provider icon inside event blocks
+  const renderEventContent = (eventInfo: any) => {
+    const { meetingProvider, status } = eventInfo.event.extendedProps;
+    const isCancelled = status === 'cancelled';
+    const provider = meetingProvider && providerIcons[meetingProvider]
+      ? providerIcons[meetingProvider]
+      : meetingProvider ? providerIcons.other : null;
+
+    return (
+      <div className="fc-event-main-content">
+        <div className={`fc-event-title-container ${isCancelled ? 'line-through' : ''}`}>
+          {eventInfo.timeText && (
+            <div className="fc-event-time">{eventInfo.timeText}</div>
+          )}
+          <div className="fc-event-title">{eventInfo.event.title}</div>
+        </div>
+        {provider && !isCancelled && (
+          <div
+            className="fc-event-provider-icon"
+            dangerouslySetInnerHTML={{
+              __html: `${provider.icon}<span>${provider.label}</span>`,
+            }}
+          />
+        )}
+      </div>
+    );
+  };
+
   const handleEventClick = (info: any) => {
     const eventId = info.event.id;
     router.push(`/${siteLocale}/calendar/${calendarId}/event/${eventId}`);
   };
 
-  // When the owner clicks or drags on the grid, navigate to the new event
-  // page with the selected start/end times pre-filled as query params.
   const handleSelect = (info: any) => {
     if (!isOwner) return;
 
-    // Format dates as datetime-local values (YYYY-MM-DDTHH:MM)
     const formatForInput = (date: Date) => {
       const pad = (n: number) => String(n).padStart(2, '0');
       return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -104,7 +148,7 @@ export function WeekView({
   };
 
   return (
-    <div className="rounded-xl border bg-card p-2 sm:p-4 fc-mobile-wrapper">
+    <div className="rounded-xl border bg-card p-2 sm:p-4 fc-mobile-wrapper fc-calendar-card">
       <FullCalendar
         ref={calendarRef}
         plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
@@ -116,6 +160,7 @@ export function WeekView({
           : { left: 'prev,next today', center: 'title', right: 'timeGridWeek,timeGridDay' }
         }
         events={fcEvents}
+        eventContent={renderEventContent}
         eventClick={handleEventClick}
         selectable={isOwner}
         selectMirror={isOwner}

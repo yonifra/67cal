@@ -6,6 +6,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { WeekView } from '@/components/calendar/WeekView';
+import { ExportCalendarButton } from '@/components/calendar/ExportCalendarButton';
 import { InviteModal } from '@/components/invite/InviteModal';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,11 @@ function CalendarContent() {
             </div>
           </div>
           <div className="flex items-center gap-2 ps-10 sm:ps-0">
+            <ExportCalendarButton
+              calendarId={calendarId}
+              calendarTitle={calendar.title}
+              events={events}
+            />
             {isOwner && (
               <InviteModal
                 inviteCode={calendar.inviteCode}

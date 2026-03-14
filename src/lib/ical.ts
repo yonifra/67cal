@@ -23,6 +23,29 @@ export function generateICS(event: CalendarEvent, calendarTitle?: string): strin
   return calendar.toString();
 }
 
+export function generateMultiEventICS(events: CalendarEvent[], calendarTitle?: string): string {
+  const calendar = ical({
+    name: calendarTitle || '67Cal',
+    method: ICalCalendarMethod.PUBLISH,
+  });
+
+  for (const event of events) {
+    if (event.status === 'cancelled') continue;
+
+    calendar.createEvent({
+      start: event.startTime.toDate(),
+      end: event.endTime.toDate(),
+      summary: event.title,
+      description: event.description,
+      url: event.meetingLink || undefined,
+      location: event.meetingLink || undefined,
+      status: 'CONFIRMED' as any,
+    });
+  }
+
+  return calendar.toString();
+}
+
 export function generateGoogleCalendarUrl(event: CalendarEvent): string {
   const startDate = event.startTime.toDate();
   const endDate = event.endTime.toDate();

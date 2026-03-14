@@ -44,7 +44,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-3 sm:px-4">
+      <div className="flex h-14 items-center justify-between px-3 sm:px-6 lg:px-8">
         <Link href={`/${locale}/dashboard`} className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <Calendar className="h-5 w-5 text-primary shrink-0" />
           <span className="font-heading text-lg font-bold tracking-tight hidden xs:inline sm:inline">{tc('appName')}</span>
