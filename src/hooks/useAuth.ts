@@ -18,18 +18,33 @@ export function useAuth() {
         // document has been written.
         const currentRole = useAuthStore.getState().role;
         if (currentRole !== null) {
+          // Role was already set (e.g. by RegisterForm). Still try to load
+          // avatar data from Firestore if profile exists.
+          getUserProfile(firebaseUser.uid).then((profile) => {
+            if (profile) {
+              useAuthStore.getState().setAvatar(
+                profile.avatarStyle ?? null,
+                profile.avatarSeed ?? null
+              );
+            }
+          }).catch(() => { /* ignore */ });
           setRoleLoading(false);
           return;
         }
         try {
           const profile = await getUserProfile(firebaseUser.uid);
           setRole(profile?.role ?? null);
+          useAuthStore.getState().setAvatar(
+            profile?.avatarStyle ?? null,
+            profile?.avatarSeed ?? null
+          );
         } catch (error) {
           console.error('Error fetching user profile:', error);
           setRole(null);
         }
       } else {
         setRole(null);
+        useAuthStore.getState().setAvatar(null, null);
       }
       setRoleLoading(false);
     });

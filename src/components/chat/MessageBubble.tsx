@@ -3,6 +3,7 @@
 import { Message } from '@/types';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/UserAvatar';
 import { Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -31,10 +32,20 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        'flex w-full',
+        'flex w-full gap-2',
         isTeacherMessage ? 'justify-end' : 'justify-start'
       )}
     >
+      {!isTeacherMessage && (
+        <div className="flex-shrink-0 mt-1">
+          <UserAvatar
+            displayName={message.authorName}
+            avatarStyle={message.authorAvatarStyle}
+            avatarSeed={message.authorAvatarSeed}
+            size="sm"
+          />
+        </div>
+      )}
       <div
         className={cn(
           'group relative max-w-[75%] rounded-sm px-4 py-2',
@@ -93,6 +104,16 @@ export function MessageBubble({
           )}
         </div>
       </div>
+      {isTeacherMessage && (
+        <div className="flex-shrink-0 mt-1">
+          <UserAvatar
+            displayName={message.authorName}
+            avatarStyle={message.authorAvatarStyle}
+            avatarSeed={message.authorAvatarSeed}
+            size="sm"
+          />
+        </div>
+      )}
     </div>
   );
 }

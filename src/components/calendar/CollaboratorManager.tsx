@@ -9,6 +9,7 @@ import { QRCodeDisplay } from '@/components/invite/QRCodeDisplay';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { RefreshCw, X, Loader2, Users } from 'lucide-react';
+import { UserAvatar } from '@/components/UserAvatar';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
@@ -141,9 +142,17 @@ export function CollaboratorManager({ calendar, onUpdate }: CollaboratorManagerP
                 key={profile.uid}
                 className="flex items-center justify-between rounded-sm border px-4 py-3"
               >
-                <div>
-                  <p className="text-sm font-medium">{profile.displayName}</p>
-                  <p className="text-xs text-muted-foreground">{profile.email}</p>
+                <div className="flex items-center gap-3">
+                  <UserAvatar
+                    displayName={profile.displayName}
+                    avatarStyle={profile.avatarStyle}
+                    avatarSeed={profile.avatarSeed}
+                    size="sm"
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{profile.displayName}</p>
+                    <p className="text-xs text-muted-foreground">{profile.email}</p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"

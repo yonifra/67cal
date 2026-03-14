@@ -7,6 +7,7 @@ import { getUserProfiles } from '@/lib/firestore/users';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Loader2, GraduationCap, X } from 'lucide-react';
+import { UserAvatar } from '@/components/UserAvatar';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 
@@ -96,9 +97,17 @@ export function MemberList({ calendar, onUpdate }: MemberListProps) {
                 key={profile.uid}
                 className="flex items-center justify-between rounded-sm border px-4 py-3"
               >
-                <div>
-                  <p className="text-sm font-medium">{profile.displayName}</p>
-                  <p className="text-xs text-muted-foreground">{profile.email}</p>
+                <div className="flex items-center gap-3">
+                  <UserAvatar
+                    displayName={profile.displayName}
+                    avatarStyle={profile.avatarStyle}
+                    avatarSeed={profile.avatarSeed}
+                    size="sm"
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{profile.displayName}</p>
+                    <p className="text-xs text-muted-foreground">{profile.email}</p>
+                  </div>
                 </div>
                 <Button
                   variant="ghost"

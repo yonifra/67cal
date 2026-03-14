@@ -17,6 +17,8 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   createdAt: Timestamp;
+  avatarStyle?: string;   // DiceBear style name: 'adventurer' | 'funEmoji' | 'bottts' | 'bigSmile'
+  avatarSeed?: string;    // Random seed string for generating the avatar
 }
 
 export interface Calendar {
@@ -61,6 +63,8 @@ export interface Message {
   authorRole: AuthorRole;
   text: string;
   createdAt: Timestamp;
+  authorAvatarStyle?: string;
+  authorAvatarSeed?: string;
 }
 
 export interface FileAttachment {

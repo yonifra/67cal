@@ -24,6 +24,8 @@ export async function sendMessage(
     authorName: string;
     authorRole: AuthorRole;
     text: string;
+    authorAvatarStyle?: string;
+    authorAvatarSeed?: string;
   }
 ): Promise<string> {
   const docRef = await addDoc(messagesRef(calendarId, eventId), {

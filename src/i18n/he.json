@@ -33,6 +33,7 @@
   "nav": {
     "dashboard": "לוח בקרה",
     "settings": "הגדרות",
+    "profile": "פרופיל",
     "signOut": "התנתקות",
     "signedOut": "התנתקתם בהצלחה",
     "signOutFailed": "ההתנתקות נכשלה",
@@ -353,5 +354,19 @@
     "somethingWrong": "משהו השתבש",
     "unexpectedError": "אירעה שגיאה בלתי צפויה. נסו שוב.",
     "tryAgain": "נסו שוב"
+  },
+  "profile": {
+    "title": "הפרופיל שלי",
+    "subtitle": "התאימו אישית את האווטאר ושם התצוגה",
+    "avatar": "אווטאר",
+    "chooseStyle": "בחרו סגנון",
+    "shuffle": "ערבוב",
+    "displayName": "שם תצוגה",
+    "saved": "הפרופיל נשמר!",
+    "saveFailed": "שמירת הפרופיל נכשלה",
+    "styleAdventurer": "הרפתקן",
+    "styleFunEmoji": "אמוג׳י כיפי",
+    "styleBottts": "רובוטים",
+    "styleBigSmile": "חיוך גדול"
   }
 }

@@ -33,6 +33,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "settings": "Settings",
+    "profile": "Profile",
     "signOut": "Sign Out",
     "signedOut": "Signed out successfully",
     "signOutFailed": "Failed to sign out",
@@ -353,5 +354,19 @@
     "somethingWrong": "Something went wrong",
     "unexpectedError": "An unexpected error occurred. Please try again.",
     "tryAgain": "Try Again"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Customize your avatar and display name",
+    "avatar": "Avatar",
+    "chooseStyle": "Choose a style",
+    "shuffle": "Shuffle",
+    "displayName": "Display Name",
+    "saved": "Profile saved!",
+    "saveFailed": "Failed to save profile",
+    "styleAdventurer": "Adventurer",
+    "styleFunEmoji": "Fun Emoji",
+    "styleBottts": "Robots",
+    "styleBigSmile": "Big Smile"
   }
 }

@@ -38,6 +38,13 @@ export async function updateUserRole(uid: string, role: UserRole): Promise<void>
   await updateDoc(doc(db, 'users', uid), { role });
 }
 
+export async function updateUserProfile(
+  uid: string,
+  data: { displayName?: string; avatarStyle?: string; avatarSeed?: string }
+): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), data);
+}
+
 export async function getUserProfiles(uids: string[]): Promise<UserProfile[]> {
   if (uids.length === 0) return [];
   const profiles: UserProfile[] = [];

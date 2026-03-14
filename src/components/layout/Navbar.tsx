@@ -10,11 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/UserAvatar';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, LogOut, Settings, User, Menu } from 'lucide-react';
+import { Calendar, LogOut, User } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslations } from 'next-intl';
@@ -27,6 +27,8 @@ export function Navbar() {
   const locale = useLocale();
   const user = useAuthStore((s) => s.user);
   const role = useAuthStore((s) => s.role);
+  const avatarStyle = useAuthStore((s) => s.avatarStyle);
+  const avatarSeed = useAuthStore((s) => s.avatarSeed);
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -38,10 +40,6 @@ export function Navbar() {
       toast.error(tn('signOutFailed'));
     }
   };
-
-  const initials = user?.displayName
-    ? user.displayName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-    : user?.email?.[0]?.toUpperCase() ?? '?';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
@@ -56,11 +54,13 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback className="rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                      {initials}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar
+                    displayName={user.displayName ?? undefined}
+                    email={user.email ?? undefined}
+                    avatarStyle={avatarStyle}
+                    avatarSeed={avatarSeed}
+                    size="md"
+                  />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
@@ -78,13 +78,19 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href={`/${locale}/dashboard`}>
-                    <Calendar className="mr-2 h-4 w-4" />
+                    <Calendar className="me-2 h-4 w-4" />
                     {tn('dashboard')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`/${locale}/profile`}>
+                    <User className="me-2 h-4 w-4" />
+                    {tn('profile')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="me-2 h-4 w-4" />
                   {tn('signOut')}
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -53,14 +53,16 @@ export function ChatThread({ calendarId, eventId, isOwner }: ChatThreadProps) {
 
   const handleSend = async (text: string) => {
     if (!user) return;
+    const { avatarStyle, avatarSeed } = useAuthStore.getState();
     try {
       await sendMessage(calendarId, eventId, {
         authorId: user.uid,
         authorName: user.displayName || user.email || 'Anonymous',
         authorRole: isOwner ? 'teacher' : 'pupil',
         text,
+        ...(avatarStyle && avatarSeed ? { authorAvatarStyle: avatarStyle, authorAvatarSeed: avatarSeed } : {}),
       });
-    } catch (error: any) {
+    } catch {
       toast.error(t('sendFailed'));
     }
   };
