@@ -203,6 +203,7 @@
   }
   html {
     @apply font-sans;
+    font-size: 17px;
   }
   html[dir="rtl"] {
     @apply font-hebrew;
